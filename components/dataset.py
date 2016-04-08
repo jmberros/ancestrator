@@ -1,4 +1,5 @@
-from os.path import join
+from glob import glob
+from os.path import join, basename
 from components.source import Source
 from helpers.config import Config
 
@@ -28,3 +29,29 @@ class Dataset:
         with open(self.file, 'r') as f:
             samples = [line.strip() for line in f.readlines()]
         return self.source.samples.ix[samples]
+
+    def write_clusters_files(self, dest_dir):
+        """
+        Will write a file with three columns: FID, IID, and cluster info, for
+        use with plink (cluster info is used for Fst).
+        """
+        samples_info = self._thousand_genomes.all_samples().ix[self.sample_ids]
+        # Family ID (FID), Within-family ID (IID), Cluster ID
+        filenames = []
+        for level in ["population", "superpopulation"]:
+            df = samples_info.reset_index()
+            df["FID"] = df["sample"]
+            df = df[["FID", "sample", level]]
+            filename = "{}.{}.clusters".format(self.label, level)
+            df.to_csv(join(dest_dir, filename), sep="\t", header=None,
+                      index=False)
+            filenames.append(filename)
+
+        return filenames
+
+    @staticmethod
+    def available_datasets(source_label):
+        datasets_dir = join(Source(source_label).base_dir, 'datasets')
+        samples_files = glob(join(datasets_dir, '*.samples'))
+        labels = [basename(f).replace('.samples', '') for f in samples_files]
+        return sorted(labels)
