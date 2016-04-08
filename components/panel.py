@@ -1,6 +1,8 @@
+import numpy as np
 import pandas as pd
 
-from os.path import join, isfile
+from glob import glob
+from os.path import join, isfile, basename
 from components.source import Source
 from helpers.config import Config
 
@@ -13,18 +15,21 @@ class Panel:
         - To get genotypes from a given Source, put a <label>.traw of the panel
         in the Source dir!
         """
-        self.base_dir = Config('dirs')['panels']
-
-        bim_file = join(self.base_dir, panel_label + '.bim')
+        bim_file = join(self.base_dir(), panel_label + '.bim')
         self.snps = self.read_bim(bim_file)
 
-        info_file = join(self.base_dir, panel_label + '.csv')
+        info_file = join(self.base_dir(), panel_label + '.csv')
         if isfile(info_file):
             self.extra_info = self.read_info(info_file)
 
         self.rs_ids = self.snps.index.values  # Redundant, but handy shortcut
         self.label = panel_label
         self.name = self._generate_name()
+        self.parent = None
+        if "_from_" in self.label:
+            parent_label = self.label.split("_from_")[1]
+            self.parent = Panel(parent_label)
+
         self.genotypes_cache = {}
 
     def __repr__(self):
@@ -61,23 +66,27 @@ class Panel:
         name = "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
         return name
 
-    #  def generate_subset_SNP_list(self, length, sort_key="LSBL(Fst)"):
-        #  """
-        #  This generates a .snps file with one rs_id per line.
-        #  The extraction of SNPs from the original .bed should be run in plink.
-        #  Afterwards, you can just read the new subpanel with Panel(label).
-        #  """
-        #  new_label = '{}_SNPs_from_{}'.format(length, self.label)
-        #  rs_ids_with_genotypes = self.genotypes_1000G().columns
-        #  snps_with_genotype = self.extra_info.loc[rs_ids_with_genotypes]
-        #  snps_with_genotype.sort_values(sort_key, ascending=False, inplace=True)
-        #  subpanel = snps_with_genotype.ix[:length, :]
-        #  filename = join(self.PANEL_INFO_DIR, new_label)
-        #  subpanel.to_csv(filename + ".csv",
-                        #  index_label=self.extra_info.index.name)
-        #  np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")
+    def generate_subset_SNP_list(self, length, sort_key="LSBL(Fst)"):
+        """
+        This generates a .snps file with one rs_id per line.
+        The extraction of SNPs from the original .bed should be run in plink.
+        Afterwards, you can just read the new subpanel with Panel(label).
+        """
+        new_label = '{}_SNPs_from_{}'.format(length, self.label)
+        rs_ids_with_genotypes = self.genotypes_1000G().columns
+        snps_with_genotype = self.extra_info.loc[rs_ids_with_genotypes]
+        snps_with_genotype.sort_values(sort_key, ascending=False, inplace=True)
+        subpanel = snps_with_genotype.ix[:length, :]
+        filename = join(self.PANEL_INFO_DIR, new_label)
+        subpanel.to_csv(filename + ".csv",
+                        index_label=self.extra_info.index.name)
+        np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")
 
-        #  return filename
+        return filename
+
+    @staticmethod
+    def base_dir():
+        return Config('dirs')['panels']
 
     @staticmethod
     def read_bim(filename):
@@ -89,6 +98,11 @@ class Panel:
     @staticmethod
     def read_info(filename):
         return pd.read_csv(filename, index_col="rs_id")
+
+    @classmethod
+    def available_panels(cls):
+        bim_files = glob(join(cls.base_dir(), '*.bim'))
+        return [basename(f).replace('.bim', '') for f in bim_files]
 
     #  @classmethod
     #  def panel_groups(cls):
