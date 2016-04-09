@@ -1,10 +1,10 @@
-import numpy as np
 import pandas as pd
 
 from glob import glob
 from os.path import join, isfile, basename
 from components.source import Source
 from helpers.config import Config
+from helpers.plink import Plink
 
 
 class Panel:
@@ -34,6 +34,9 @@ class Panel:
 
     def __repr__(self):
         return '<Panel {}>'.format(self.name)
+
+    def __len__(self):
+        return len(self.snps)
 
     def genotypes(self, source_label, dataset=None):
         if self.genotypes_cache.get(source_label) is None:
@@ -66,23 +69,39 @@ class Panel:
         name = "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
         return name
 
-    def generate_subset_SNP_list(self, length, sort_key="LSBL(Fst)"):
+    def generate_subpanel(self, length, sort_key="LSBL(Fst)", source_label=None):
         """
-        This generates a .snps file with one rs_id per line.
-        The extraction of SNPs from the original .bed should be run in plink.
+        This generates .snps, .csv and .bim files with a subset of markers.
+        The extraction of SNPs from the .bed files should be run in plink;
+        you can use the .snps file for that purpose.
         Afterwards, you can just read the new subpanel with Panel(label).
         """
-        new_label = '{}_SNPs_from_{}'.format(length, self.label)
-        rs_ids_with_genotypes = self.genotypes_1000G().columns
-        snps_with_genotype = self.extra_info.loc[rs_ids_with_genotypes]
-        snps_with_genotype.sort_values(sort_key, ascending=False, inplace=True)
-        subpanel = snps_with_genotype.ix[:length, :]
-        filename = join(self.PANEL_INFO_DIR, new_label)
-        subpanel.to_csv(filename + ".csv",
-                        index_label=self.extra_info.index.name)
-        np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")
+        subpanel_label = '{}_SNPs_from_{}'.format(length, self.label)
+        filepath = join(self.base_dir(), subpanel_label)
 
-        return filename
+        # .csv file
+        subpanel = self.extra_info.sort_values(sort_key, ascending=False)
+        subpanel = subpanel.ix[:length, :]
+        subpanel.to_csv(filepath + ".csv",
+                        index_label=self.extra_info.index.name)
+
+        # .bim file
+        bim_df = subpanel.copy().reset_index()
+        bim_df['morgans'] = 0
+        bim_df = bim_df[self.bim_fields()]
+        bim_df.to_csv(filepath + '.bim', index=False)
+
+        # .snps file
+        bim_df['rs_id'].to_csv(filepath + '.snps', index=False)
+
+        # .bed file
+        if source_label is not None:
+            source = Source(source_label)
+            bfile_in = join(source.panels_dir, self.label)
+            out = join(source.panels_dir, subpanel_label)
+            Plink(bfile_in).extract(filepath + '.snps', out=out)
+
+        return filepath
 
     @staticmethod
     def base_dir():
@@ -90,10 +109,13 @@ class Panel:
 
     @staticmethod
     def read_bim(filename):
-        bim_fields = ["chr", "rs_id", "morgans", "position", "A1", "A2"]
-        df = pd.read_table(filename, names=bim_fields, index_col="rs_id",
+        df = pd.read_table(filename, names=Panel.bim_fields(), index_col="rs_id",
                            usecols=["chr", "rs_id", "position", "A1", "A2"])
         return df
+
+    @staticmethod
+    def bim_fields():
+        return ["chr", "rs_id", "morgans", "position", "A1", "A2"]
 
     @staticmethod
     def read_info(filename):
