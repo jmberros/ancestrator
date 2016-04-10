@@ -11,10 +11,10 @@ class Source:
         """
         Expects to find:
             <base_dir>/<label>/samples.csv
-            # with fields: sample, population, superpopulation[, gender]
+            # with fields: sample, population, region[, gender]
 
             <base_dir>/<label>/populations.csv
-            # with fields: population, description, superpopulation
+            # with fields: population, description, region
 
             <base_dir>/label>/panels/<panel_label>.bed
             (^ for any requested panel)
@@ -47,7 +47,7 @@ class Source:
         df.drop(['CHR', '(C)M', 'POS', 'COUNTED', 'ALT'], axis=1, inplace=True)
         df.columns = [iid_fid.split('_')[1] for iid_fid in df.columns]
         df.columns.name, df.index.name = 'sample', 'rs_id'
-        multi_index = ['superpopulation', 'population', 'sample']
+        multi_index = ['region', 'population', 'sample']
         df = self.samples.join(df.T).reset_index().set_index(multi_index)
         return df.sort_index()
 
@@ -67,36 +67,38 @@ class Source:
         if 'gender' in samples.columns:
             samples.drop('gender', axis=1, inplace=True)
         samples.set_index('sample', inplace=True)
+        samples.rename(columns={'superpopulation': 'region'}, inplace=True)
         return samples
 
     def _read_populations(self):
         populations = pd.read_csv(join(self.base_dir, 'populations.csv'))
+        populations.rename(columns={'superpopulation': 'region'}, inplace=True)
         populations.set_index('population', inplace=True)
         return populations
 
     #  def samples_from_pop_codes(self, pop_codes):
-        #  # Assumes pop_code as a column.
-        #  missing = setdiff1d(pop_codes, self.all_samples()["population"])
-        #  if len(missing) > 0:
-            #  raise ValueError("Couldn't find populations: {}".format(missing))
+    #  # Assumes pop_code as a column.
+    #  missing = setdiff1d(pop_codes, self.all_samples()["population"])
+    #  if len(missing) > 0:
+    #  raise ValueError("Couldn't find populations: {}".format(missing))
 
         #  # Turn population into index temporarily to get the desired samples
         #  # *in the order of the pop_codes*. Then set the original index back.
-        #  filtered = self.all_samples().reset_index().set_index("population").loc[pop_codes]
+        #  filtered = self.all_samples().reset_index()\
+        # .set_index("population").loc[pop_codes]
         #  return filtered.reset_index().set_index("sample").dropna()
 
     #  @classmethod
     #  def population_names(cls):
-        #  if isfile(cls.POP_NAMES_FILE):
-            #  return pd.read_csv(cls.POP_NAMES_FILE, index_col="population")
+    #  if isfile(cls.POP_NAMES_FILE):
+    #  return pd.read_csv(cls.POP_NAMES_FILE, index_col="population")
 
         #  df = cls._get_pop_names_from_url()
         #  keep_these_columns = ["Population Code", "Population Description",
-                              #  "Super Population Code"]
+        #  "Super Population Code"]
         #  df = df[keep_these_columns]
         #  df.columns = ["population", "description", "superpopulation"]
         #  df.set_index("population", inplace=True)
 
         #  df.to_csv(cls.POP_NAMES_FILE)
         #  return df
-

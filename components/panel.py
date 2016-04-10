@@ -15,15 +15,17 @@ class Panel:
         - To get genotypes from a given Source, put a <label>.traw of the panel
         in the Source dir!
         """
-        bim_file = join(self.base_dir(), panel_label + '.bim')
+        self.label = panel_label
+        self.path_label = join(self.base_dir(), self.label)
+
+        bim_file = self.path_label + '.bim'
         self.snps = self.read_bim(bim_file)
 
-        info_file = join(self.base_dir(), panel_label + '.csv')
+        info_file = self.path_label + '.csv'
         if isfile(info_file):
             self.extra_info = self.read_info(info_file)
 
         self.rs_ids = self.snps.index.values  # Redundant, but handy shortcut
-        self.label = panel_label
         self.name = self._generate_name()
         self.parent = None
         if "_from_" in self.label:
