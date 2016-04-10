@@ -30,10 +30,12 @@ class Dataset:
         self.populations = self.samples['population'].unique()
 
     def __repr__(self):
-        # TODO: include source and panel in this name
-        template = "<Dataset {}, {} populations, {} samples>"
-        return template.format(self.label, len(self.populations),
-                               len(self.samples))
+        template = '<[{}][{}] Dataset {}, {} populations, {} samples>'
+        panel_label = 'No Panel'
+        if hasattr(self, 'panel'):
+            panel_label = self.panel.label
+        return template.format(self.source.label, panel_label, self.label,
+                               len(self.populations), len(self.samples))
 
     def genotypes(self, panel_label):
         if panel_label not in self.genotypes_cache:

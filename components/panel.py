@@ -26,11 +26,11 @@ class Panel:
             self.extra_info = self.read_info(info_file)
 
         self.rs_ids = self.snps.index.values  # Redundant, but handy shortcut
-        self.name = self._generate_name()
         self.parent = None
         if "_from_" in self.label:
             parent_label = self.label.split("_from_")[1]
             self.parent = Panel(parent_label)
+        self.name = self._generate_name()
 
         self.genotypes_cache = {}
 
@@ -59,16 +59,9 @@ class Panel:
         #  return total_obs
 
     def _generate_name(self):
-        # TODO: think about the Subpanel subclass
-        #  if "_from_" in self.label:  # Subpanel
-            #  name = self.label.replace("_", " ")
-        #  else:
-
-        #  is_AIMs_panel = ("GAL" in self.label)
-        #  if is_AIMs_panel:
-            #  name = name.replace("SNPs", "AIMs")
-
         name = "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
+        if self.parent:
+            name = '{} · SubPanel_{}'.format(self.parent.label, len(self.rs_ids))
         return name
 
     def generate_subpanel(self, length, sort_key="LSBL(Fst)", source_label=None):
@@ -124,8 +117,11 @@ class Panel:
         return pd.read_csv(filename, index_col="rs_id")
 
     @classmethod
-    def available_panels(cls):
+    def available_panels(cls, source_label=None):
         bim_files = glob(join(cls.base_dir(), '*.bim'))
+        if source_label is not None:
+            glob_expr = join(Source(source_label).panels_dir, '*.bim')
+            bim_files = glob(glob_expr)
         return [basename(f).replace('.bim', '') for f in bim_files]
 
     #  @classmethod
