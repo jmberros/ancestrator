@@ -25,15 +25,18 @@ class Source:
         self.label = source_label
         self.samples = self._read_samples()
         self.populations = self._read_populations()
+        self.genotypes_cache = {}
 
     def __repr__(self):
         return '<Source "{}">'.format(self.label)
 
     def genotypes(self, panel_label):
-        filepath = join(self.panels_dir, panel_label + '.traw')
-        if not isfile(filepath):
-            self._create_traw_from_bed(panel_label)
-        return self._read_traw(filepath)
+        if self.genotypes_cache.get(panel_label) is None:
+            filepath = join(self.panels_dir, panel_label + '.traw')
+            if not isfile(filepath):
+                self._create_traw_from_bed(panel_label)
+            self.genotypes_cache[panel_label] = self._read_traw(filepath)
+        return self.genotypes_cache[panel_label]
 
     def has_panel(self, panel_label):
         return panel_label in self.available_panels()

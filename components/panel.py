@@ -12,8 +12,6 @@ class Panel:
         """
         - Reads an rs_id list from a <label>.bim file. Will also look for a
         <label>.csv info file about the SNPs in the panel.
-        - To get genotypes from a given Source, put a <label>.traw of the panel
-        in the Source dir!
         """
         self.label = panel_label
         self.path_label = join(self.base_dir(), self.label)
@@ -32,25 +30,11 @@ class Panel:
             self.parent = Panel(parent_label)
         self.name = self._generate_name()
 
-        self.genotypes_cache = {}
-
     def __repr__(self):
         return '<Panel {}>'.format(self.name)
 
     def __len__(self):
         return len(self.snps)
-
-    def genotypes(self, source_label, dataset=None):
-        if self.genotypes_cache.get(source_label) is None:
-            data = Source(source_label).genotypes(self.label)
-            self.genotypes_cache[source_label] = data
-
-        if dataset is None:
-            return self.genotypes_cache[source_label]
-
-        # Assmes a MultiIndex with levels: superpopulation, population, sample
-        slicer = pd.IndexSlice[:, :, dataset.sample_ids]
-        return self.genotypes_cache.loc[slicer, :]
 
     #  def allele_freqs(self, level="population"):
         #  genotypes = self.genotypes_1000G()
@@ -59,9 +43,9 @@ class Panel:
         #  return total_obs
 
     def _generate_name(self):
-        name = "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
+        name = '"{0}" · {1:,} SNPs'.format(self.label, len(self.rs_ids))
         if self.parent:
-            name = '{} · SubPanel_{}'.format(self.parent.label, len(self.rs_ids))
+            name = '"{}" · SubPanel_{}'.format(self.parent.label, len(self.rs_ids))
         return name
 
     def generate_subpanel(self, length, sort_key="LSBL(Fst)", source_label=None):
