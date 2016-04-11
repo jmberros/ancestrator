@@ -22,7 +22,7 @@ class SampleGroup:
         self.regions = self.samples['region'].unique()
 
     def __repr__(self):
-        tmpl = '<SampleGroup "{}" · {} regions · {} populations · {} samples>'
+        tmpl = '<SampleGroup {} · {} regions · {} populations · {} samples>'
         return tmpl.format(self.label, len(self.populations),
                            len(self.regions), len(self.samples))
 

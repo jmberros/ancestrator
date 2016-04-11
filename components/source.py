@@ -28,7 +28,7 @@ class Source:
         self.genotypes_cache = {}
 
     def __repr__(self):
-        return '<Source "{}">'.format(self.label)
+        return '<Source {}>'.format(self.label)
 
     def genotypes(self, panel_label):
         if self.genotypes_cache.get(panel_label) is None:

@@ -43,9 +43,9 @@ class Panel:
         #  return total_obs
 
     def _generate_name(self):
-        name = '"{0}" · {1:,} SNPs'.format(self.label, len(self.rs_ids))
+        name = '{0} · {1:,} SNPs'.format(self.label, len(self.rs_ids))
         if self.parent:
-            name = '"{}" · SubPanel_{}'.format(self.parent.label, len(self.rs_ids))
+            name = '{} · SubPanel_{}'.format(self.parent.label, len(self.rs_ids))
         return name
 
     def generate_subpanel(self, length, sort_key="LSBL(Fst)", source_label=None):
