@@ -1,6 +1,6 @@
 import pandas as pd
 
-from os.path import join, basename
+from os.path import join
 from pandas import IndexSlice as idx
 
 from components.panel import Panel
@@ -34,10 +34,11 @@ class Dataset:
         # TODO finish this ^
 
     def run_fst(self, level='region'):
-        clusters_file = self._write_clusters_files(level)
+        clusters_file = self.samplegroup._write_clusters_files(level)
         bed_filepath = self._make_bed()  # .bed file to compute Fst from
         plink = Plink(bed_filepath)
-        out_label = '{}.{}.{}'.format(self.label, self.panel.label, level)
+        out_label = '{}.{}.{}'.format(self.samplegroup.label, self.panel.label,
+                                      level)
         fst_file = plink.fst(clusters_file, out=out_label) + '.fst'
         fst_file_fields = ['chr', 'rs_id', 'position', 'NMISS', 'Fst']
         df = pd.read_table(fst_file, index_col='rs_id', skiprows=1,
@@ -48,8 +49,8 @@ class Dataset:
         self.panel = Panel(panel_label)
 
     def _make_bed(self):
-        new_label = '{}.{}'.format(self.label, self.panel.label)
+        new_label = '{}.{}'.format(self.samplegroup.label, self.panel.label)
         plink = Plink(join(self.source.panels_dir, self.panel.label))
-        plink_out = plink.keep_fam(self.samples_file, out=new_label)
+        plink_out = plink.keep_fam(self.samplegroup.samples_file,
+                                   out=new_label)
         return plink_out
-
