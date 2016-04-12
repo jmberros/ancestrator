@@ -41,16 +41,16 @@ class Dataset:
 
         return self._genotypes_mem
 
-    def smartpca(self, args={}):
-        self.make_ped()
-        pca = SmartPCA(dataset=self)
-        pca.run(args)
-        return pca
-
-    def sklearn_pca(self, normalize=True):
-        pca = SklearnPCA(self)
-        pca.run(normalize=normalize)
-        return pca
+    def pca(self, implementation='smartpca', normalize=True, args={}):
+        if implementation == 'smartpca':
+            self.make_ped()
+            pca = SmartPCA(dataset=self)
+            pca.run(args)
+            return pca
+        elif implementation == 'sklearn':
+            pca = SklearnPCA(self)
+            pca.run(normalize=normalize)
+            return pca
 
     def fst(self, level='region'):
         self.samplegroup._write_clusters_files(level)

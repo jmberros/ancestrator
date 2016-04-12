@@ -22,7 +22,6 @@ class SmartPCA(BasePCA):
         args = {**self.arguments(), **args}
         parfile_path = self._create_parameters_file(args)
         command = '{} -p {}'.format(self._EXECUTABLE, parfile_path)
-        print(command)
         with open(self._output_filepath('pca.log'), 'w+') as logfile:
             subprocess.call(command.split(' '), stdout=logfile)
 

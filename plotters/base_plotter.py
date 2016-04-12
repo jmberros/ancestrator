@@ -10,4 +10,3 @@ class BasePlotter:
     """
     def __init__(self):
         self.colors = Config('colors')
-        pass

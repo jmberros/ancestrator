@@ -1,4 +1,4 @@
-import sklearn
+import sklearn.decomposition
 from math import sqrt
 from pandas import DataFrame
 from analyzers.base_pca import BasePCA
