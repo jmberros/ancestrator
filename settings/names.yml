@@ -1,3 +1,4 @@
+ALL: Todos
 L: Latinos
 LE: Latinos, Europeos
 LEA: Latinos, Europeos, Africanos

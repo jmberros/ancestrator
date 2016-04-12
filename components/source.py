@@ -16,12 +16,12 @@ class Source:
             <base_dir>/<label>/populations.csv
             # with fields: population, description, region
 
-            <base_dir>/label>/panels/<panel_label>.bed
-            (^ for any requested panel)
-            It will creat a .traw for panel if it doesn't find one.
+            <base_dir>/<label>/datasets/<dataset_label>.bed
+            (^ for any requested dataset)
+            It will creat a .traw for dataset if it doesn't find one.
         """
         self.base_dir = join(Config('dirs')['sources'], source_label)
-        self.panels_dir = join(self.base_dir, 'panels')
+        self.datasets_dir = join(self.base_dir, 'datasets')
         self.label = source_label
         self.samples = self._read_samples()
         self.populations = self._read_populations()
@@ -30,20 +30,23 @@ class Source:
     def __repr__(self):
         return '<Source {}>'.format(self.label)
 
-    def genotypes(self, panel_label):
-        if self.genotypes_cache.get(panel_label) is None:
-            filepath = join(self.panels_dir, panel_label + '.traw')
+    def genotypes(self, dataset_label):
+        if self.genotypes_cache.get(dataset_label) is None:
+            filepath = join(self.datasets_dir, dataset_label + '.traw')
             if not isfile(filepath):
-                self._create_traw_from_bed(panel_label)
-            self.genotypes_cache[panel_label] = self._read_traw(filepath)
-        return self.genotypes_cache[panel_label]
+                self._create_traw_from_bed(dataset_label)
+            self.genotypes_cache[dataset_label] = self._read_traw(filepath)
+        return self.genotypes_cache[dataset_label]
 
-    def has_panel(self, panel_label):
-        return panel_label in self.available_panels()
+    def has_dataset(self, dataset_label):
+        return dataset_label in self.available_datasets()
 
-    def available_panels(self):
-        bedfiles = glob(join(self.panels_dir, '*.bed'))
+    def available_datasets(self):
+        bedfiles = glob(join(self.datasets_dir, '*.bed'))
         return [basename(bfile).replace('.bed', '') for bfile in bedfiles]
+
+    def bedfile_path(self, dataset_label):
+        return join(self.datasets_dir, dataset_label)
 
     def _read_traw(self, filepath):
         df = pd.read_table(filepath, index_col='SNP')
@@ -54,9 +57,9 @@ class Source:
         df = self.samples.join(df.T).reset_index().set_index(multi_index)
         return df.sort_index()
 
-    def _create_traw_from_bed(self, panel_label):
-        print('Calling plink to create a .traw for {}'.format(panel_label))
-        bedfile = join(self.panels_dir, panel_label)
+    def _create_traw_from_bed(self, dataset_label):
+        print('Calling plink to create a .traw for {}'.format(dataset_label))
+        bedfile = join(self.datasets_dir, dataset_label)
         if not isfile(bedfile + '.bed'):
             raise OSError("Couldn't find {}.bed".format(bedfile))
         subprocess.run([

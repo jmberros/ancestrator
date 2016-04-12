@@ -1,12 +1,11 @@
-import pandas as pd
-
-from os.path import join
 from pandas import IndexSlice as idx
+from os.path import isfile
 
 from components.panel import Panel
 from components.sample_group import SampleGroup
 from components.source import Source
 from analyzers.smart_pca import SmartPCA
+from analyzers.fst import Fst
 from helpers.plink import Plink
 
 
@@ -18,7 +17,15 @@ class Dataset:
         """
         self.source = Source(source_label)
         self.samplegroup = SampleGroup(samplegroup_label, source_label)
-        self.set_panel(panel_label)
+
+        self.panel = Panel(panel_label)
+        self.panel_bedfile = self.source.bedfile_path('ALL.'+self.panel.label)
+
+        self.label = '{}.{}'.format(self.samplegroup.label, self.panel.label)
+        self.bedfile = self.source.bedfile_path(self.label)
+        self.bimfile = self.bedfile + '.bim'
+        self.pedfile = self.bedfile + '.ped'
+        self._genotypes_mem = None
 
     def __repr__(self):
         template = '{{Dataset:\n  {}\n  {}\n  {}}}'
@@ -26,31 +33,30 @@ class Dataset:
                                str(self.panel))
 
     def genotypes(self):
-        all_genos = self.source.genotypes(self.panel.label)
-        return all_genos.loc[idx[:, :, self.samplegroup.sample_ids], :]
+        if self._genotypes_mem is None:
+            all_genos = self.source.genotypes('ALL.'+self.panel.label)
+            genos = all_genos.loc[idx[:, :, self.samplegroup.sample_ids], :]
+            self._genotypes_mem = genos
 
-    def pca(self):
-        SmartPCA.run(self)
-        # TODO finish this ^
+        return self._genotypes_mem
 
-    def run_fst(self, level='region'):
-        clusters_file = self.samplegroup._write_clusters_files(level)
-        bed_filepath = self._make_bed()  # .bed file to compute Fst from
-        plink = Plink(bed_filepath)
-        out_label = '{}.{}.{}'.format(self.samplegroup.label, self.panel.label,
-                                      level)
-        fst_file = plink.fst(clusters_file, out=out_label) + '.fst'
-        fst_file_fields = ['chr', 'rs_id', 'position', 'NMISS', 'Fst']
-        df = pd.read_table(fst_file, index_col='rs_id', skiprows=1,
-                           names=fst_file_fields)
-        return df
+    def smartpca(self, args={}):
+        self.make_ped()
+        return SmartPCA(dataset=self).run(args)
 
-    def set_panel(self, panel_label):
-        self.panel = Panel(panel_label)
+    def fst(self, level='region'):
+        self.samplegroup._write_clusters_files(level)
+        self.make_bed()
+        return Fst.run(self, level)
 
-    def _make_bed(self):
-        new_label = '{}.{}'.format(self.samplegroup.label, self.panel.label)
-        plink = Plink(join(self.source.panels_dir, self.panel.label))
-        plink_out = plink.keep_fam(self.samplegroup.samples_file,
-                                   out=new_label)
-        return plink_out
+    def make_bed(self):
+        if isfile(self.bedfile):
+            return self.bedfile
+        plink = Plink(self.panel_bedfile)
+        return plink.keep_fam(self.samplegroup.samples_file, out=self.bedfile)
+
+    def make_ped(self):
+        if isfile(self.pedfile):
+            return self.pedfile
+        self.make_bed()
+        return Plink(self.bedfile).ped()

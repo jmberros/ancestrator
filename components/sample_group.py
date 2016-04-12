@@ -9,6 +9,8 @@ class SampleGroup:
     def __init__(self, samplegroup_label, source_label):
         """
         Looks for samples in <source_dir>/samplegroups/<samplegroup>.samples
+        Special label 'ALL' will not look for a .samples file, but instead
+        give you all the source's samples.
         """
         self.label = samplegroup_label
         self.name = Config('names')[self.label]
@@ -23,14 +25,18 @@ class SampleGroup:
 
     def __repr__(self):
         tmpl = '<SampleGroup {} · {} regions · {} populations · {} samples>'
-        return tmpl.format(self.label, len(self.populations),
-                           len(self.regions), len(self.samples))
+        return tmpl.format(self.label, len(self.regions),
+                           len(self.populations), len(self.samples))
 
     def _read_samples(self):
+        all_samples = self.source.samples
+        if self.label == 'ALL':
+            return all_samples
+
         self.samples_file = join(self.base_dir, self.label + '.samples')
         with open(self.samples_file, 'r') as f:
             samples = [line.strip() for line in f.readlines()]
-        return self.source.samples.ix[samples]
+        return all_samples.ix[samples]
 
     def _write_clusters_files(self, level='population'):
         """
@@ -47,6 +53,10 @@ class SampleGroup:
         clusters.to_csv(filepath, sep="\t", header=None, index=False)
 
         return filepath
+
+    def clusters_filepath(self, level):
+        filename = '{}.{}.clusters'.format(self.label, level)
+        return join(self.base_dir, filename)
 
     @staticmethod
     def available_samplegroups(source_label):
