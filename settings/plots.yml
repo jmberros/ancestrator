@@ -1,0 +1,6 @@
+PCA:
+    primary_marker: 'o'
+    secondary_marker: 'x'
+    markersize: 30
+    linewidth: 0.5
+    alpha: 0.8

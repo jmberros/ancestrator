@@ -5,6 +5,7 @@ from components.panel import Panel
 from components.sample_group import SampleGroup
 from components.source import Source
 from analyzers.smart_pca import SmartPCA
+from analyzers.sklearn_pca import SklearnPCA
 from analyzers.fst import Fst
 from helpers.plink import Plink
 
@@ -42,7 +43,14 @@ class Dataset:
 
     def smartpca(self, args={}):
         self.make_ped()
-        return SmartPCA(dataset=self).run(args)
+        pca = SmartPCA(dataset=self)
+        pca.run(args)
+        return pca
+
+    def sklearn_pca(self, normalize=True):
+        pca = SklearnPCA(self)
+        pca.run(normalize=normalize)
+        return pca
 
     def fst(self, level='region'):
         self.samplegroup._write_clusters_files(level)
