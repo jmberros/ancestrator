@@ -3,6 +3,10 @@ primary_populations: &primary_populations
     - PUR
     - MXL
     - CLM
+    - Colombian
+    - Maya
+    - Pima
+    - Surui
 
 PCA:
     reference_population: PEL  # used to orient the PCAs axes consistently
