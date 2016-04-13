@@ -6,7 +6,7 @@
 * Put there a `populations.csv` with descriptions for each population. Fields:
   `population,region,description` (it's ok if it has more fields)
 * Create new dirs: `datasets`, `samplegroups` and `plots` in the source dir.
-* Create an `samplegroups/ALL.samples` plain text file with one sample id per line. It should be just a list of all sample IDs of the project. You can do `cat samples.csv | ruby -F, -lane "puts $F.first" > samplegroups/ALL.samples`.
+* Create an `samplegroups/ALL.samples` plain text file with one sample id per line. It should be just a list of all sample IDs of the project. You can do `tail -n +2 samples.csv | ruby -F, -lane 'puts $F.first' > samplegroups/ALL.samples`.
 * The panels defined in the panels dir (check `settings/dirs.yml` for the
     location) will still be the same and you can use those. Alternatively, you
     can define new panels as lists of rs IDs there.
