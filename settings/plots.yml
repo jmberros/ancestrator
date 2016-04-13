@@ -8,7 +8,7 @@ PCA:
     reference_population: PEL  # used to orient the PCAs axes consistently
     primary_populations: *primary_populations
     primary_marker: 'o'
-    secondary_marker: 'x'
+    secondary_marker: 's'
     markersize: 60
     linewidth: 0.5
     alpha: 0.8

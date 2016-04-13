@@ -17,7 +17,7 @@ class Dataset:
         - Filter the genotypes by the samples in the samplegroup.
         """
         self.source = Source(source_label)
-        self.samplegroup = SampleGroup(samplegroup_label, source_label)
+        self.samplegroup = SampleGroup(source_label, samplegroup_label)
 
         self.panel = Panel(panel_label)
         self.panel_bedfile = self.source.bedfile_path('ALL.'+self.panel.label)
@@ -58,10 +58,10 @@ class Dataset:
         return Fst.run(self, level)
 
     def make_bed(self):
-        if isfile(self.bedfile):
+        if isfile(self.bedfile + '.bed'):
             return self.bedfile
         plink = Plink(self.panel_bedfile)
-        return plink.keep_fam(self.samplegroup.samples_file, out=self.bedfile)
+        return plink.keep_fam(self.samplegroup.famfile, out=self.bedfile)
 
     def make_ped(self):
         if isfile(self.pedfile):

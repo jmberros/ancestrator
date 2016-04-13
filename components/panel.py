@@ -92,6 +92,22 @@ class Panel:
                            usecols=["chr", "rs_id", "position", "A1", "A2"])
         return df
 
+    @classmethod
+    def write_bim(cls, bim_df, label):
+        """
+        Use this to create a new Panel from a bim-info DataFrame
+        """
+        bim_df['morgans'] = 0
+        bim_df = bim_df.reset_index()
+        bim_df = bim_df[cls.bim_fields()]
+        filepath = join(cls.base_dir(), label + '.bim')
+        bim_df.to_csv(filepath, header=False, index=False, sep='\t')
+        print('Written -> ' + filepath)
+
+        filepath = join(cls.base_dir(), label + '.snps')
+        bim_df['rs_id'].to_csv(filepath, index=False, header=False)
+        print('Written -> ' + filepath)
+
     @staticmethod
     def bim_fields():
         return ["chr", "rs_id", "morgans", "position", "A1", "A2"]

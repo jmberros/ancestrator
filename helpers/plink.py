@@ -1,10 +1,12 @@
 import subprocess
-from os.path import dirname, join
+from os.path import dirname, join, isfile
 
 
 class Plink:
     def __init__(self, bfile_path):
-        self.input_bfile = bfile_path.replace('.bed', '')
+        if not isfile(bfile_path + '.bed'):
+            raise FileNotFoundError(bfile_path + '.bed')
+        self.input_bfile = bfile_path  # .replace('.bed', '')
         self.workdir = dirname(bfile_path)
 
     def __repr__(self):
@@ -16,8 +18,8 @@ class Plink:
     def extract(self, snps_filename, out):
         return self.run('--extract {}'.format(snps_filename), out=out)
 
-    def keep_fam(self, samples_filepath, out):
-        return self.run('--keep-fam {}'.format(samples_filepath), out=out)
+    def keep_fam(self, famfile, out):
+        return self.run('--keep-fam {}'.format(famfile), out=out)
 
     def fst(self, clusters_file, out=None):
         return self.run('--within {} --fst'.format(clusters_file), out=out,

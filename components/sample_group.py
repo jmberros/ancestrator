@@ -1,3 +1,5 @@
+import pandas as pd
+
 from glob import glob
 from os.path import join, basename
 
@@ -6,17 +8,17 @@ from helpers.config import Config
 
 
 class SampleGroup:
-    def __init__(self, samplegroup_label, source_label):
+    def __init__(self, source_label, samplegroup_label):
         """
-        Looks for samples in <source_dir>/samplegroups/<samplegroup>.samples
-        Special label 'ALL' will not look for a .samples file, but instead
-        give you all the source's samples.
+        Looks for samples in <source_dir>/samplegroups/<samplegroup>.fam
         """
         self.label = samplegroup_label
         self.name = Config('names')[self.label]
         self.source = Source(source_label)
         self.base_dir = join(self.source.base_dir, 'samplegroups')
-        self.samples = self._read_samples()
+
+        self.famfile = join(self.base_dir, self.label + '.fam')
+        self.samples = self._read_fam()
 
         # handy shortcuts
         self.sample_ids = self.samples.index.values
@@ -28,12 +30,39 @@ class SampleGroup:
         return tmpl.format(self.label, len(self.regions),
                            len(self.populations), len(self.samples))
 
-    def _read_samples(self):
+    def _read_fam(self):
         all_samples = self.source.samples
-        self.samples_file = join(self.base_dir, self.label + '.samples')
-        with open(self.samples_file, 'r') as f:
-            samples = [line.strip() for line in f.readlines()]
-        return all_samples.ix[samples]
+        samples = pd.read_table(self.famfile, names=self._fam_fields(),
+                                index_col="sample", sep='\s+')
+        return all_samples.loc[samples.index]
+
+    @staticmethod
+    def _fam_fields():
+        return ['family', 'sample', 'father', 'mother', 'sexcode', 'pheno']
+
+    #  def _read_samples(self):
+        #  all_samples = self.source.samples
+        #  self.samples_file = join(self.base_dir, self.label + '.fam')
+        #  with open(self.samples_file, 'r') as f:
+            #  samples = [line.strip() for line in f.readlines()]
+        #  return all_samples.ix[samples]
+
+    @classmethod
+    def write_fam(cls, samples_df, source_label, new_samplegroup_label):
+        """
+        Writes a .fam file from a dataframe of samples. Useful if you're
+        subsetting an existing SampleGroup. The dataframe should have the
+        sample IDs as index.
+        """
+        dest_dir = join(Source(source_label).base_dir, 'samplegroups')
+        filepath = join(dest_dir, new_samplegroup_label + '.fam')
+        fam_df = samples_df.reset_index()
+        fam_df['father'] = fam_df['mother'] = fam_df['sexcode'] = 0
+        fam_df['pheno'] = -9
+        fam_df = fam_df[cls._fam_fields()]
+        fam_df.to_csv(filepath, index=False, header=False, sep=' ')
+        print('Written -> ' + filepath)
+        return filepath
 
     def _write_clusters_files(self, level='population'):
         """
