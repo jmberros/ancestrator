@@ -1,7 +1,9 @@
 #  import matplotlib.pyplot as plt
 #  import seaborn as sns
 
-from helpers.config import Config
+import matplotlib.pyplot as plt
+from os.path import join
+# from helpers.config import Config
 
 
 class BasePlotter:
@@ -9,4 +11,12 @@ class BasePlotter:
     Abstract class. Use PCAPlotter and the like, not this one.
     """
     def __init__(self):
-        self.colors = Config('colors')
+        # FIXME make this work
+        # self.colors = Config('colors')
+        pass
+
+    def savefig(self, filename):
+        filepath = join(self.base_dir, filename)
+        plt.savefig(filepath, format='png', dpi=300, bbox_inches='tight')
+        print('Saved at -> ' + filepath + '.png')
+        return filepath

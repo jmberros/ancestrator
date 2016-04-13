@@ -11,11 +11,11 @@ class PCAPlotter(BasePlotter):
     Expects a PCA object with 'results' and 'explained_variance' attributes.
     """
 
-    def __init__(self, pca):
+    def __init__(self, pca, plots_dir):
         self.colors = Config('colors')  # FIXME use super()__init__()!
-        self.base_dir = Config('dirs')['plots']
+        self.base_dir = plots_dir  # FIXME should be in super too
         self.plot_settings = Config('plots')['PCA']
-        self.comoponents = pca.result
+        self.components = pca.result
         self.explained_variance = pca.explained_variance
 
     def draw_ax(self, ax, selected_components):
@@ -32,7 +32,8 @@ class PCAPlotter(BasePlotter):
         for population, values in grouped_results:
             kwargs = self._plot_kwargs(population)
             x, y = components
-            values.plot(kind='scatter', x=x, y=y, ax=ax, **kwargs)
+            values.plot(kind='scatter', x=x, y=y, ax=ax, label=population,
+                        **kwargs)
 
             # Decide whether to flip the axes to keep the reference population
             # in the upper left quadrant.
@@ -85,7 +86,7 @@ class PCAPlotter(BasePlotter):
     def _new_color(self):
         if not hasattr(self, '_more_colors'):
             palette_name = self.colors['QualitativePalette']
-            populations = self.components.get_level_values('population')
+            populations = self.components.index.get_level_values('population')
             number_of_populations = len(populations.unique())
             self._more_colors = sns.color_palette(palette_name,
                                                   number_of_populations)

@@ -30,9 +30,6 @@ class SampleGroup:
 
     def _read_samples(self):
         all_samples = self.source.samples
-        if self.label == 'ALL':
-            return all_samples
-
         self.samples_file = join(self.base_dir, self.label + '.samples')
         with open(self.samples_file, 'r') as f:
             samples = [line.strip() for line in f.readlines()]

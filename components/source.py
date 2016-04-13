@@ -22,6 +22,7 @@ class Source:
         """
         self.base_dir = join(Config('dirs')['sources'], source_label)
         self.datasets_dir = join(self.base_dir, 'datasets')
+        self.plots_dir = join(self.base_dir, 'plots')
         self.label = source_label
         self.samples = self._read_samples()
         self.populations = self._read_populations()
