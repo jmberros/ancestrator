@@ -7,9 +7,7 @@
   `population,region,description` (it's ok if it has more fields)
 * Create new dirs: `datasets`, `samplegroups` and `plots` in the source dir.
 * Create an `samplegroups/ALL.samples` plain text file with one sample id per line. It should be just a list of all sample IDs of the project. You can do `tail -n +2 samples.csv | ruby -F, -lane 'puts $F.first' > samplegroups/ALL.samples`.
-* The panels defined in the panels dir (check `settings/dirs.yml` for the
-    location) will still be the same and you can use those. Alternatively, you
-    can define new panels as lists of rs IDs there.
+* The panels defined in the panels dir (check `settings/dirs.yml` for the location) will still be the same. Alternatively, you can define new panels as lists of rs IDs there (see next section). For every panel you want to use, you need to create the `ALL` bedfiles under the `datasets` dir --for instance, `ALL.MyPanel.{bed,bim,fam}`. That bedfile will be used as base and filtered when asking for different samplegroups within that panel.
 
 # Create a new Panel of rs IDs #
 Panels are defined independently of sources and can be used across multiple
