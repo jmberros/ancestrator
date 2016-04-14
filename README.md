@@ -1,32 +1,26 @@
 # Add a new Source #
-* Create a new dir with the source name under the sources directory
-  (sources directory is defined in `settings/dirs.yml`).
-* Put there a `samples.csv` with info about each sample. Fields are:
-  `sample,family,population,region` (include a header!)
-* Put there a `populations.csv` with descriptions for each population. Fields:
-  `population,region,description` (it's ok if it has more fields; include a
-  header)
-* Create new dirs: `datasets`, `samplegroups` and `plots` in the source dir.
-* Create an `samplegroups/ALL.fam` famfile with `family ID, sample ID, father, mother, sexcode, phenotype`.
-* The panels defined in the panels dir (check `settings/dirs.yml` for the location) will still be the same. Alternatively, you can define new panels as lists of rs IDs there (see next section). For every panel you want to use, you need to create the `ALL` bedfiles under the `datasets` dir --for instance, `ALL.MyPanel.{bed,bim,fam}`. Make sure you also copy the `.bim` of that panel to the panels directory, dropping the `ALL.` bit. The bedfile will be used as base and filtered when asking for different samplegroups within that panel.
+* Create a new dir with the source name under the sources directory (sources directory is defined in `settings/dirs.yml`).
+* Put there a `samples.csv` with info about each sample. Fields are: `sample,family,population,region` (include a header!)
+* Put there a `populations.csv` with descriptions for each population. Fields: `population,region,description` (it's ok if it has more fields; include a header)
+* Create new dirs: `datasets`, `samplegroups` and `plots` in the source dir. * Create a `samplegroups/ALL.fam` famfile with `family ID, sample ID, father, mother, sexcode, phenotype` and all the samples available for the new source.
+* For every SNPs panel you want to use with this source, create `ALL.MyPanel.{bed,bim,fam}` bedfiles in the `datasets` directory and copy the `.bim` also to the panels directory but dropping the `ALL` bit (e.g. `MyPanel.bim`). The bedfiles under `datasets` will be used as base and filtered when asking for different samplegroups within that panel. The `.bim` will be used for reference across sources/samplegroups.
 
 # Create a new Panel of rs IDs #
-Panels are defined independently of sources and can be used across multiple
-sources, but nothing assures you that the list of SNPs will be found in every
-source. (For instance, HGDP has a limited set of markers available.)
+Panels are defined independently of sources and can be used across multiple sources, but nothing assures you that the list of SNPs will be found in every source. (For instance, HGDP has a limited set of markers available.)
 
 To add a new panel:
 
-* Create a new `.bim` file in the panels dir (defined in `settings/dirs.yml`) with the info about each marker. The `Panel.write_bim()` method might be of use for this if you're subsetting an existing panel or creating it via IPython. The method will also write a `.snps` helper file that is needed.
+* Put the list of marker IDs that constitute the new panel in a `.snps` file. The `Panel.write_bim()` method might be of use for this if you're subsetting an existing panel or creating it via IPython, it will also create a `.snps`.
+
+* Extract the genotypes for ALL samples at those _loci_. This means creating the `ALL` bedfiles `ALL.MyPanel.{bed,bim,fam}` for the new panel under the `datasets` dir in the desired Source directory. Use plink for this with the `.snps` you just created and the project/source original genotypes file (it might be a `.vcf`, in that case use `plink --vcf <SourceFile.vcf>`): `plink --bfile <SourceFile> --extract MyPanel.snps --make-bed --out ALL.MyPanel`. 
+
+    Alternatively, you can do it with `ancestrator`, it the SourceFile that serves as base is a set of bedfiles:
+    `Plink(<Path to Source bedfile>).extract(<filepath to .snps of new panel>, out='ALL.MyPanel')`
+
+* Copy the `.bim` and `.snps` files (already created in the previous steps) to the panels directory (defined in `settings/dirs.yml`).
 
 * You can also throw a `.csv` in there with extra info about the SNPs. Make sure you use the same filename (say, `MyPanel.bim` and `MyPanel.csv`).
 
-* Create the `ALL` bedfiles `ALL.MyPanel.{bed,bim,fam}` for the new panel under the `datasets` dir. This bedfile will be used as a base to filter different samplegroups later. To create the new bedfiles use plink with the `.snps` you just created: `plink --bfile <ALL.base> --extract MyPanel.snps --make-bed --out ALL.MyPanel`. 
-
-    Alternatively, you can do it with `ancestrator`:
-    `Plink(BasePanel.bedfile).extract(<filepath to .snps just created>, out='ALL.MyPanel')`
-
 # Create a new SampleGroup #
-* Put a list of sample IDs in a new `.samples` file under the `samplegroups`
-    directory of the desired source. The list should be subset of the samples
-    found in `ALL.samples`.
+* Put a list of sample IDs in a new `.samples` file under the `samplegroups` directory of the desired source. The list should be subset of the samples found in `ALL.samples`.
+* Filter the `ALL.fam` file in the `samplegroups` directory picking the samples you want. You can use the `SampleGroup.write_fam(samples_df, source_label, new_samplegroup_label)` method if you're filtering from a pandas DataFrame. E.g. `samples_df = SampleGroup('1000Genomes', 'ALL').samples; samples_df = samples_df[samples_df.region == 'AMR']; SampleGroup.write_fam(samples_df, '1000Genomes', 'AMR')`.
