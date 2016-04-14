@@ -36,7 +36,7 @@ class Dataset:
     def genotypes(self):
         if self._genotypes_mem is None:
             all_genos = self.source.genotypes('ALL.'+self.panel.label)
-            genos = all_genos.loc[idx[:, :, self.samplegroup.sample_ids], :]
+            genos = all_genos.loc[idx[:, :, :, self.samplegroup.sample_ids], :]
             self._genotypes_mem = genos
 
         return self._genotypes_mem

@@ -13,7 +13,7 @@ class SampleGroup:
         Looks for samples in <source_dir>/samplegroups/<samplegroup>.fam
         """
         self.label = samplegroup_label
-        self.name = Config('names')[self.label]
+        self.name = Config('names').get(self.label, self.label)
         self.source = Source(source_label)
         self.base_dir = join(self.source.base_dir, 'samplegroups')
 
@@ -36,16 +36,26 @@ class SampleGroup:
                                 index_col="sample", sep='\s+')
         return all_samples.loc[samples.index]
 
+    @classmethod
+    def new_samplegroup(cls, source_label, population_or_region_codes,
+                        new_samplegroup_label):
+        """
+        Create a new SampleGroup filtering all the available samples with the
+        provided population and/or region codes (you can mix them). It will
+        write the new .fam file needed to later use SampleGroup('NewLabel').
+        """
+        all_samples = SampleGroup(source_label, 'ALL').samples
+        pop_mask = all_samples.population.isin(population_or_region_codes)
+        region_mask = all_samples.region.isin(population_or_region_codes)
+        samples_df = pd.concat([all_samples[pop_mask], all_samples[region_mask]])
+        cls.write_fam(samples_df, source_label, new_samplegroup_label)
+
+        msg = "You can now call SampleGroup('{}', '{}')"
+        print(msg.format(source_label, new_samplegroup_label))
+
     @staticmethod
     def _fam_fields():
         return ['family', 'sample', 'father', 'mother', 'sexcode', 'pheno']
-
-    #  def _read_samples(self):
-        #  all_samples = self.source.samples
-        #  self.samples_file = join(self.base_dir, self.label + '.fam')
-        #  with open(self.samples_file, 'r') as f:
-            #  samples = [line.strip() for line in f.readlines()]
-        #  return all_samples.ix[samples]
 
     @classmethod
     def write_fam(cls, samples_df, source_label, new_samplegroup_label):

@@ -52,10 +52,13 @@ class Source:
     def _read_traw(self, filepath):
         df = pd.read_table(filepath, index_col='SNP')
         df.drop(['CHR', '(C)M', 'POS', 'COUNTED', 'ALT'], axis=1, inplace=True)
-        df.columns = [iid_fid.split('_')[1] for iid_fid in df.columns]
+        # fids = [iid_fid.split('_')[0] for iid_fid in df.columns]
+        iids = [iid_fid.split('_')[1] for iid_fid in df.columns]
+        df.columns = iids  # Use individual IDs as columns!
         df.columns.name, df.index.name = 'sample', 'rs_id'
-        multi_index = ['region', 'population', 'sample']
-        df = self.samples.join(df.T).reset_index().set_index(multi_index)
+        df = self.samples.join(df.transpose())  # Adds region, pop, family info
+        multi_index = ['region', 'population', 'family', 'sample']
+        df = df.reset_index().set_index(multi_index)
         return df.sort_index()
 
     def _create_traw_from_bed(self, dataset_label):
