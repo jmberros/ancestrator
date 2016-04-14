@@ -69,18 +69,18 @@ class PCAPlotter(BasePlotter):
         return ax
 
     def _plot_kwargs(self, population):
+        primary = population in self.plot_settings['primary_populations']
+        importance = 'primary' if primary else 'secondary'
         kwargs = {
             # Generate a new color for a population if there's no color defined
             # in the settings yml.
             'color': self.colors.get(population, self._new_color()),
-            'marker': self.plot_settings['primary_marker'],
-            'lw': self.plot_settings['linewidth'],
-            'alpha': self.plot_settings['alpha'],
-            's': self.plot_settings['markersize'],
+            'marker': self.plot_settings[importance]['marker'],
+            'lw': self.plot_settings[importance]['linewidth'],
+            'alpha': self.plot_settings[importance]['alpha'],
+            's': self.plot_settings[importance]['markersize'],
+            'zorder': self.plot_settings[importance]['zorder'],
         }
-        primary_population = population in self.plot_settings['primary_populations']
-        if not primary_population:
-            kwargs['marker'] = self.plot_settings['secondary_marker']
         return kwargs
 
     def _new_color(self):

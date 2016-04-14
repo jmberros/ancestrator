@@ -16,7 +16,9 @@ class BasePlotter:
         pass
 
     def savefig(self, filename):
+        if not filename.endswith('.png'):
+            filename += '.png'
         filepath = join(self.base_dir, filename)
-        plt.savefig(filepath, format='png', dpi=300, bbox_inches='tight')
-        print('Saved at -> ' + filepath + '.png')
+        plt.savefig(filepath, dpi=300, bbox_inches='tight')
+        print('Saved at -> ' + filepath)
         return filepath

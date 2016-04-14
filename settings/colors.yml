@@ -19,11 +19,11 @@ GBR: RoyalBlue
 
 # Africa
 LWK: Red
-YRI: Crimson
+YRI: Brown
 
 # East Asia
 CHB: DarkTurquoise
-CHS: DeepSkyBlue
+CHS: DarkCyan
 
 # South Asia
 GIH: Fuchsia
@@ -31,27 +31,31 @@ GIH: Fuchsia
 # other_colors: ["#a65628", "#ff7f00", "#999999", "#a6cee3", "#b2df8a",
                # "#cab2d6", "#ffff99"]
 
-# Colombians: DarkGreen
-# Karitiana: Indigo
-# Maya: DeepPink
-# Pima: DodgerBlue
-# Surui: GoldenRod
+# America
+Colombians: DarkGreen
+Karitiana: Indigo
+Maya: DeepPink
+Pima: DodgerBlue
+Surui: GoldenRod
 
-# BiakaPygmy: IndianRed
-# Bantu: DarkRed
-# Mandenka: DarkOrange
+# Africa
+BiakaPygmy: IndianRed
+Bantu: DarkRed
+Mandenka: DarkOrange
 
 # Middle East
-# Adygei: RoyalBlue
-# Balochi: DarkViolet
-# Bedouin: DarkOrchid
-# Brahui: Fuchsia
+Adygei: RoyalBlue
+Balochi: DarkViolet
+Bedouin: DarkOrchid
+Brahui: Fuchsia
 
-# Bergamo: Navy
-# Basque: DeepSkyBlue
-# French: MidnightBlue
-#
-# Mongola: DarkMagenta
+# Europe
+Bergamo: Navy
+Basque: DeepSkyBlue
+French: MidnightBlue
+
+# Asia
+Mongola: DarkMagenta
 
 # Oceania
-# Papuan: DarkOliveGreen
+Papuan: DarkOliveGreen

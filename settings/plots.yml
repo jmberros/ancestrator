@@ -11,8 +11,15 @@ primary_populations: &primary_populations
 PCA:
     reference_population: PEL  # used to orient the PCAs axes consistently
     primary_populations: *primary_populations
-    primary_marker: 'o'
-    secondary_marker: 's'
-    markersize: 60
-    linewidth: 0.5
-    alpha: 0.8
+    primary:
+        marker: 'o'
+        markersize: 60
+        alpha: 1
+        linewidth: 0
+        zorder: 2  # Higher values are on top
+    secondary:
+        marker: 'D'
+        markersize: 30
+        alpha: 1
+        linewidth: 0
+        zorder: 1
