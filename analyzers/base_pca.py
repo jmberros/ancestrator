@@ -14,3 +14,10 @@ class BasePCA:
         if filename is None:
             filename = '{}.{}'.format(self.dataset.label, type(self).__name__)
         self.plotter.savefig(filename)
+
+    def _write_result_csvs(self):
+        self.result.to_csv(self._output_filepath('eigenvals') + '.csv')
+        self.explained_variance.to_csv(self._output_filepath('eigenvecs') + '.csv')
+
+    def _output_filepath(self, ext):
+        return self.dataset.bedfile + '.' + ext

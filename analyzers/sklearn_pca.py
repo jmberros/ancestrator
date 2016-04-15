@@ -31,20 +31,23 @@ class SklearnPCA(BasePCA):
         # Leave only SNPs with genotype defined at every sample
         genotypes.dropna(axis=1, inplace=True)
 
-        # sklearn_pca = PCA()
+        components_to_take = 15
         sklearn_pca = sklearn.decomposition.PCA()
         pca_result_matrix = sklearn_pca.fit_transform(genotypes.values)
         result = DataFrame(pca_result_matrix, index=genotypes.index)
+        result = result.ix[:, :components_to_take-1]  # (Indexing in pandas)
         result.columns = ["PC{}".format(ix+1)
                           for ix in result.columns]
         result = result.sort_index()
         self.result = result
 
-        variance = sklearn_pca.explained_variance_ratio_
+        variance = sklearn_pca.explained_variance_ratio_[:components_to_take]
         variance = DataFrame(variance, index=result.columns)
+        variance.index.name = 'component'
         variance.columns = ['percentage']
         variance['percentage'] = variance['percentage'].map(percentage_fmt)
         self.explained_variance = variance
+        self._write_result_csvs()  # Useful for d3 use
 
     def _normalize(self, series):
         # Taken from Patterson et al. 2006, doi:10.1371/journal.pgen.0020190

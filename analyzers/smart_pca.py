@@ -75,9 +75,6 @@ class SmartPCA(BasePCA):
         pedind.to_csv(pedind_filepath, sep=' ', header=False, index=False)
         return pedind_filepath
 
-    def _output_filepath(self, ext):
-        return self.dataset.bedfile + '.' + ext
-
     def _parse_evec_file(self, df):
         df[0] = df[0].map(lambda s: s.split(':')[1])
         df = df.set_index(0)
@@ -92,13 +89,10 @@ class SmartPCA(BasePCA):
     def _read_eval_file(self, eval_filename):
         df = pd.read_table(eval_filename, header=None, names=['variance'])
         df.index = ['PC{}'.format(ix + 1) for ix in df.index]
+        df.index.name = 'component'
         df['ratio'] = df['variance'] / df['variance'].sum()
         df['percentage'] = df['ratio'].map(percentage_fmt)
         return df
-
-    def _write_result_csvs(self):
-        self.result.to_csv(self._evecfile + '.csv')
-        self.explained_variance.to_csv(self._evalfile + '.csv')
 
     def _read_log(self):
         self._logfile
