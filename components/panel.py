@@ -18,6 +18,7 @@ class Panel:
 
         bim_file = self.path_label + '.bim'
         self.snps = self.read_bim(bim_file)
+        self.snps_file = self.path_label + '.snps'
 
         info_file = self.path_label + '.csv'
         if isfile(info_file):
@@ -93,20 +94,21 @@ class Panel:
         return df
 
     @classmethod
-    def write_bim(cls, bim_df, label):
+    def write_bim(cls, snps_df, label):
         """
-        Use this to create a new Panel from a bim-info DataFrame
+        Use this to create a new Panel from a snps DataFrame
         """
-        bim_df['morgans'] = 0
-        bim_df = bim_df.reset_index()
-        bim_df = bim_df[cls.bim_fields()]
+        snps_df['morgans'] = 0
+        snps_df = snps_df.reset_index()
+        snps_df = snps_df[cls.bim_fields()]
         filepath = join(cls.base_dir(), label + '.bim')
-        bim_df.to_csv(filepath, header=False, index=False, sep='\t')
+        snps_df.to_csv(filepath, header=False, index=False, sep='\t')
         print('Written -> ' + filepath)
 
         filepath = join(cls.base_dir(), label + '.snps')
-        bim_df['rs_id'].to_csv(filepath, index=False, header=False)
+        snps_df['rs_id'].to_csv(filepath, index=False, header=False)
         print('Written -> ' + filepath)
+        print("You can now call Panel('{}')".format(label))
 
     @staticmethod
     def bim_fields():
@@ -123,43 +125,3 @@ class Panel:
             glob_expr = join(Source(source_label).panels_dir, '*.bim')
             bim_files = glob(glob_expr)
         return [basename(f).replace('.bim', '') for f in bim_files]
-
-    #  @classmethod
-    #  def panel_groups(cls):
-        #  return {
-            #  "panels": cls.all_panels(),
-            #  "control_panels": cls.all_control_panels(),
-            #  "subpanels": cls.all_subpanels()
-        #  }
-
-    #  @classmethod
-    #  def all_panels_and_subpanels(cls):
-        #  glob_expr = join(cls.THOUSAND_GENOMES_DIR, "*.bim")
-        #  bim_files = [basename(path) for path in glob(glob_expr)]
-        #  labels = sorted([fn.replace(".bim", "") for fn in bim_files])
-
-        #  gal_panels = [label for label in labels if "GAL" in label]
-        #  control_panels = [label for label in labels if "CPx" in label]
-        #  subpanels = [label for label in labels if "_from_" in label and
-                     #  label not in gal_panels + control_panels]
-
-        #  return [cls(label) for label in gal_panels + control_panels + subpanels]
-
-    #  @classmethod
-    #  def all_panels(cls):
-        #  return [panel for panel in cls.all_panels_and_subpanels()
-                #  if "GAL" in panel.label and "_from_" not in panel.label]
-
-    #  @classmethod
-    #  def all_subpanels(cls, label=None):
-        #  all_panels = cls.all_panels_and_subpanels()
-        #  subpanels = [p for p in all_panels if "_from_" in p.label]
-        #  if label is not None:
-            #  subpanels = [sp for sp in subpanels if label in sp.label]
-        #  subpanels.sort(key=lambda p: len(p.rs_ids), reverse=True)
-        #  return subpanels
-
-    #  @classmethod
-    #  def all_control_panels(cls):
-        #  return [panel for panel in cls.all_panels_and_subpanels()
-                #  if "CPx" in panel.label and "_from_" not in panel.label]

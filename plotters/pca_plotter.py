@@ -7,31 +7,34 @@ from helpers.config import Config
 
 
 class PCAPlotter(BasePlotter):
-    """
-    Expects a PCA object with 'results' and 'explained_variance' attributes.
-    """
-
     def __init__(self, pca, plots_dir):
+        """
+        Expects a PCA object with 'results' and 'explained_variance'
+        """
         self.colors = Config('colors')  # FIXME use super()__init__()!
         self.base_dir = plots_dir  # FIXME should be in super too
         self.plot_settings = Config('plots')['PCA']
         self.components = pca.result
         self.explained_variance = pca.explained_variance
 
-    def draw_ax(self, ax, selected_components):
+    def draw_ax(self, ax, components_to_plot):
         """
         Draws a scatterplot of the first two columns in eigenvalues
         """
-        grouped_results = selected_components.groupby(level='population')
-        components = selected_components.columns[:2]
+        if len(components_to_plot) != 2:
+            error_msg = 'I only know how to plot exactly TWO components. '
+            error_msg += 'I received: {}'.format(components_to_plot)
+            raise ValueError(error_msg)
+        selected_components = self.components[components_to_plot]
         reference_population = self.plot_settings['reference_population']
 
         ylabel_prefix = ""
         xlabel_prefix = ""
 
+        grouped_results = selected_components.groupby(level='population')
         for population, values in grouped_results:
             kwargs = self._plot_kwargs(population)
-            x, y = components
+            x, y = components_to_plot
             values.plot(kind='scatter', x=x, y=y, ax=ax, label=population,
                         **kwargs)
 

@@ -22,5 +22,4 @@ To add a new panel:
 * You can also throw a `.csv` in there with extra info about the SNPs. Make sure you use the same filename (say, `MyPanel.bim` and `MyPanel.csv`).
 
 # Create a new SampleGroup #
-* Put a list of sample IDs in a new `.samples` file under the `samplegroups` directory of the desired source. The list should be subset of the samples found in `ALL.samples`.
 * Filter the `ALL.fam` file in the `samplegroups` directory picking the samples you want. You can use the `SampleGroup.write_fam(samples_df, source_label, new_samplegroup_label)` method if you're filtering from a pandas DataFrame. E.g. `samples_df = SampleGroup('1000Genomes', 'ALL').samples; samples_df = samples_df[samples_df.region == 'AMR']; SampleGroup.write_fam(samples_df, '1000Genomes', 'AMR')`.

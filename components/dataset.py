@@ -57,6 +57,14 @@ class Dataset:
         self.make_bed()
         return Fst.run(self, level)
 
+    def extract_subdataset_from_panel(self, panel):
+        new_label = '{}.{}'.format(self.samplegroup.label, panel.label)
+        filename = Plink(self.bedfile).extract(panel.snps_file, out=new_label)
+        print('Written -> ' + filename)
+        msg = "You can now call Dataset('{}', '{}', '{}')"
+        print(msg.format(self.source.label, self.samplegroup.label,
+                         panel.label))
+
     def make_bed(self):
         if isfile(self.bedfile + '.bed'):
             return self.bedfile

@@ -1,9 +1,12 @@
 primary_populations: &primary_populations
-    - PEL
-    - PUR
-    - MXL
-    - CLM
+    # 1000Genomes
+    # - PEL
+    # - PUR
+    # - MXL
+    # - CLM
+    # MaxPlank
     - Colombian
+    - Karitiana
     - Maya
     - Pima
     - Surui
@@ -13,13 +16,13 @@ PCA:
     primary_populations: *primary_populations
     primary:
         marker: 'o'
-        markersize: 60
+        markersize: 90
         alpha: 1
-        linewidth: 0
+        linewidth: 0.25
         zorder: 2  # Higher values are on top
     secondary:
         marker: 'D'
         markersize: 30
         alpha: 1
-        linewidth: 0
+        linewidth: 0.25
         zorder: 1

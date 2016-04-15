@@ -40,9 +40,10 @@ class SampleGroup:
     def new_samplegroup(cls, source_label, population_or_region_codes,
                         new_samplegroup_label):
         """
-        Create a new SampleGroup filtering all the available samples with the
-        provided population and/or region codes (you can mix them). It will
-        write the new .fam file needed to later use SampleGroup('NewLabel').
+        Create a new SampleGroup filtering all the available samples in a given
+        source with the provided population and/or region codes (you can mix
+        them). It will write the new .fam file needed to later use
+        SampleGroup('NewLabel').
         """
         all_samples = SampleGroup(source_label, 'ALL').samples
         pop_mask = all_samples.population.isin(population_or_region_codes)

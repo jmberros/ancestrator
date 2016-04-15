@@ -8,18 +8,26 @@ EAS: "#f781bf"
 SAS: "#984ea3"
 
 # Latin America
-CLM: DarkGreen
-MXL: Indigo
-PEL: PaleVioletRed
-PUR: Peru
+# CLM: DarkGreen
+# MXL: Indigo
+# PEL: PaleVioletRed
+# PUR: Peru
+CLM: White
+MXL: White
+PEL: Yellow  
+PUR: White
 
 # Europe
-IBS: Blue
-GBR: RoyalBlue
+# IBS: Blue
+# GBR: RoyalBlue
+IBS: LightGray
+GBR: LightGray
 
 # Africa
-LWK: Red
-YRI: Brown
+# LWK: Red
+# YRI: IndianRed
+LWK: LightGray
+YRI: LightGray
 
 # East Asia
 CHB: DarkTurquoise
@@ -32,11 +40,11 @@ GIH: Fuchsia
                # "#cab2d6", "#ffff99"]
 
 # America
-Colombians: DarkGreen
-Karitiana: Indigo
-Maya: DeepPink
-Pima: DodgerBlue
-Surui: GoldenRod
+# Colombian: Cyan
+# Karitiana: Black
+# Maya: Blue
+# Pima: Green
+# Surui: Red
 
 # Africa
 BiakaPygmy: IndianRed
