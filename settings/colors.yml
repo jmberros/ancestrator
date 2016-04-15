@@ -20,14 +20,14 @@ PUR: White
 # Europe
 # IBS: Blue
 # GBR: RoyalBlue
-IBS: LightGray
-GBR: LightGray
+IBS: LightBlue
+GBR: LightBlue
 
 # Africa
 # LWK: Red
 # YRI: IndianRed
-LWK: LightGray
-YRI: LightGray
+LWK: LightSalmon
+YRI: LightSalmon
 
 # East Asia
 CHB: DarkTurquoise
