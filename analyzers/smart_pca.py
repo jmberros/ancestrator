@@ -28,9 +28,10 @@ class SmartPCA(BasePCA):
         result = pd.read_table(self._evecfile, sep="\s+", header=None,
                                skiprows=1)
 
-        # TODO: read the interesting info in the log file
         self.explained_variance = self._read_eval_file(args['evaloutname'])
         self.result = self._parse_evec_file(result)
+        self._write_result_csvs()  # Useful for d3 use
+        # TODO: read the interesting info in the log file
         self.extra_info = self._read_log()
 
     def arguments(self):
@@ -84,7 +85,7 @@ class SmartPCA(BasePCA):
         df.columns = ['PC{}'.format(column) for column in df.columns]
         df.index.name = 'sample'
         df = df.join(self.dataset.samplegroup.samples).reset_index()
-        df = df.set_index(['region', 'population', 'sample'])
+        df = df.set_index(['region', 'population', 'family', 'sample'])
         df = df.sort_index()
         return df
 
@@ -94,6 +95,10 @@ class SmartPCA(BasePCA):
         df['ratio'] = df['variance'] / df['variance'].sum()
         df['percentage'] = df['ratio'].map(percentage_fmt)
         return df
+
+    def _write_result_csvs(self):
+        self.result.to_csv(self._evecfile + '.csv')
+        self.explained_variance.to_csv(self._evalfile + '.csv')
 
     def _read_log(self):
         self._logfile
