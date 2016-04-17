@@ -1,7 +1,7 @@
 import pandas as pd
 import subprocess
 
-from os.path import expanduser, join
+from os.path import expanduser, join, isfile
 from shutil import copyfile
 
 from analyzers.base_pca import BasePCA
@@ -13,26 +13,35 @@ class SmartPCA(BasePCA):
 
     def __init__(self, dataset):
         self.dataset = dataset
-
-    def run(self, args={}):
         self._evecfile = self._output_filepath('pca.evec')
         self._evalfile = self._output_filepath('pca.eval')
         self._logfile = self._output_filepath('pca.log')
 
+    def run(self, args={}):
+        if not isfile(self._evecfile) or not isfile(self._evalfile):
+            self._call_smartpca(args)
+
+        self._read_the_results_files()
+
+    def _call_smartpca(self, args={}):
         args = {**self.arguments(), **args}
         parfile_path = self._create_parameters_file(args)
         command = '{} -p {}'.format(self._EXECUTABLE, parfile_path)
         with open(self._output_filepath('pca.log'), 'w+') as logfile:
             subprocess.call(command.split(' '), stdout=logfile)
 
+        self.call_smartpca()
+        self._read_the_results_files()
+
+    def _read_the_results_files(self):
         result = pd.read_table(self._evecfile, sep="\s+", header=None,
                                skiprows=1)
-
-        self.explained_variance = self._read_eval_file(args['evaloutname'])
         self.result = self._parse_evec_file(result)
-        self._write_result_csvs()  # Useful for d3 use
+        self.explained_variance = self._read_eval_file(self._evalfile)
+        self._write_result_csvs()  # Useful for external use, e.g. d3
+
         # TODO: read the interesting info in the log file
-        self.extra_info = self._read_log()
+        # self.extra_info = self._read_log()
 
     def arguments(self):
         # See ./POPGEN/README in the eigensoft package for a description

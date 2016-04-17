@@ -16,8 +16,15 @@ class BasePCA:
         self.plotter.savefig(filename)
 
     def _write_result_csvs(self):
-        self.result.to_csv(self._output_filepath('eigenvals') + '.csv')
-        self.explained_variance.to_csv(self._output_filepath('eigenvecs') + '.csv')
+        self.result.to_csv(self._output_filepath('eigenvecs') + '.csv')
+        self.explained_variance.to_csv(self._output_filepath('eigenvals') + '.csv')
 
     def _output_filepath(self, ext):
         return self.dataset.bedfile + '.' + ext
+
+    def rotate_values_by_angle(self, angle, components=['PC1', 'PC2']):
+        original_values = self.result[components]
+        rotated_values = original_values.copy()
+        for what in rotated_values.itertuples():
+            print(what)
+        return rotated_values
