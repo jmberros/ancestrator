@@ -40,7 +40,7 @@ class SmartPCA(BasePCA):
                                skiprows=1)
         self.result = self._parse_evec_file(result)
         self.explained_variance = self._read_eval_file(self._evalfile)
-        self._write_result_csvs()  # Useful for external use, e.g. d3
+        self.write_result_csvs()  # Useful for external use, e.g. d3
 
         # TODO: read the interesting info in the log file
         # self.extra_info = self._read_log()

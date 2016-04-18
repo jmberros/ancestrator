@@ -47,7 +47,7 @@ class SklearnPCA(BasePCA):
         variance.columns = ['percentage']
         variance['percentage'] = variance['percentage'].map(percentage_fmt)
         self.explained_variance = variance
-        self._write_result_csvs()  # Useful for d3 use
+        self.write_result_csvs()  # Useful for d3 use
 
     def _normalize(self, series):
         # Taken from Patterson et al. 2006, doi:10.1371/journal.pgen.0020190

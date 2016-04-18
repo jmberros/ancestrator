@@ -12,8 +12,7 @@ primary_populations: &primary_populations
     - Surui
 
 PCA:
-    reference_population: PEL  # used to orient the PCAs axes consistently
-    reference_top: PEL
+    reference_top: PEL  # used to orient the PCAs axes consistently
     reference_bottom: IBS
     primary_populations: *primary_populations
     primary:

@@ -11,16 +11,14 @@ class BasePCA:
     """
     def plot(self, ax=None, components_to_plot=['PC1', 'PC2'], rotate=False):
         self.plotter = PCAPlotter(self, self.dataset.source.plots_dir)
-
-        self._invert_axes(components_to_plot)
-
+        self.inverted_x = self.inverted_y = False
+        self.invert_axes(components_to_plot)
         self.rotated = rotate
         if rotate:
-            self.result = self._rotated_result(components_to_plot)
+            self.rotate_the_results(components_to_plot)
 
         if ax is None:
             _, ax = plt.subplots(figsize=(5, 5))
-
         self.plotter.draw_ax(ax, components_to_plot)
         return ax
 
@@ -29,14 +27,14 @@ class BasePCA:
             filename = '{}.{}'.format(self.dataset.label, type(self).__name__)
         self.plotter.savefig(filename)
 
-    def _write_result_csvs(self):
+    def write_result_csvs(self):
         self.result.to_csv(self._output_filepath('eigenvecs') + '.csv')
         self.explained_variance.to_csv(self._output_filepath('eigenvals') + '.csv')
 
     def _output_filepath(self, ext):
         return self.dataset.bedfile + '.' + ext
 
-    def _invert_axes(self, components):
+    def invert_axes(self, components):
         if len(components) != 2:
             raise ValueError('I need exactly two components as x and y.')
 
@@ -44,7 +42,7 @@ class BasePCA:
         x_domain, y_domain = [x.min(), x.max()], [y.min(), y.max()]
         x_mean, y_mean = np.mean(x_domain), np.mean(y_domain)
 
-        ref_population = Config('plots')['PCA']['reference_population']
+        ref_population = Config('plots')['PCA']['reference_top']
         x_refpop = x.xs(ref_population, level='population')
         y_refpop = y.xs(ref_population, level='population')
         x_median, y_median = np.median(x_refpop), np.median(y_refpop)
@@ -52,7 +50,6 @@ class BasePCA:
         ref_population_on_top = y_median > y_mean
         ref_population_in_the_left = x_median < x_mean
 
-        self.inverted_x = self.inverted_y = False
         if not ref_population_in_the_left:
             self.result[components[0]] = x.apply(lambda n: n * -1)
             self.inverted_x = True
@@ -82,10 +79,11 @@ class BasePCA:
             angle *= -1
         return angle
 
-    def _rotated_result(self, components):
+    def rotate_the_results(self, components):
         if len(components) != 2:
             raise ValueError('I need exactly two components as x and y.')
 
+        self.invert_axes(components)
         angle = self._define_angle_of_rotation(components)
         original_values = self.result[components]
         x_name, y_name = components
@@ -96,5 +94,8 @@ class BasePCA:
             rotated_values.loc[index][x_name] = new_x
             rotated_values.loc[index][y_name] = new_y
 
+        for component in rotated_values.columns:
+            self.result[component] = rotated_values[component]
+
+        self.rotated = True
         self.rotation_angle = degrees(angle)
-        return rotated_values

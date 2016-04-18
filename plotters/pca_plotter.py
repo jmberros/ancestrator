@@ -36,8 +36,8 @@ class PCAPlotter(BasePlotter):
                         **kwargs)
 
         # Set the axes labels
-        xlabel_prefix = '—' if self.pca.inverted_x else ''
-        ylabel_prefix = '—' if self.pca.inverted_y else ''
+        xlabel_prefix = '-' if self.pca.inverted_x else ''
+        ylabel_prefix = '-' if self.pca.inverted_y else ''
         xlabel_suffix = ''
         if self.pca.rotated:
             xlabel_suffix = '\nRotated {}°'.format(int(self.pca.rotation_angle))
