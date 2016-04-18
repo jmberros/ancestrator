@@ -8,26 +8,26 @@ EAS: "#f781bf"
 SAS: "#984ea3"
 
 # Latin America
-# CLM: DarkGreen
-# MXL: Indigo
-# PEL: PaleVioletRed
-# PUR: Peru
-CLM: White
-MXL: White
-PEL: Yellow  
-PUR: White
+CLM: DarkGreen
+MXL: Indigo
+PEL: PaleVioletRed
+PUR: Peru
+# CLM: White
+# MXL: White
+# PEL: Yellow  
+# PUR: White
 
 # Europe
-# IBS: Blue
-# GBR: RoyalBlue
-IBS: LightBlue
-GBR: LightBlue
+IBS: Blue
+GBR: RoyalBlue
+# IBS: LightBlue
+# GBR: LightBlue
 
 # Africa
-# LWK: Red
-# YRI: IndianRed
-LWK: LightSalmon
-YRI: LightSalmon
+LWK: Red
+YRI: IndianRed
+# LWK: LightSalmon
+# YRI: LightSalmon
 
 # East Asia
 CHB: DarkTurquoise

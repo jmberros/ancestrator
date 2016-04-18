@@ -1,4 +1,3 @@
-import numpy as np
 import seaborn as sns
 
 from plotters.base_plotter import BasePlotter
@@ -7,15 +6,17 @@ from helpers.config import Config
 
 
 class PCAPlotter(BasePlotter):
-    def __init__(self, pca, plots_dir):
+    def __init__(self, pca, plots_dir=None):
         """
         Expects a PCA object with 'results' and 'explained_variance'
         """
+        self.pca = pca
         self.colors = Config('colors')  # FIXME use super()__init__()!
         self.base_dir = plots_dir  # FIXME should be in super too
+        if plots_dir is None:
+            self.base_dir = self.pca.dataset.source.plots_dir
         self.plot_settings = Config('plots')['PCA']
-        self.components = pca.result
-        self.explained_variance = pca.explained_variance
+        self.explained_variance = self.pca.explained_variance
 
     def draw_ax(self, ax, components_to_plot):
         """
@@ -25,11 +26,7 @@ class PCAPlotter(BasePlotter):
             error_msg = 'I only know how to plot exactly TWO components. '
             error_msg += 'I received: {}'.format(components_to_plot)
             raise ValueError(error_msg)
-        selected_components = self.components[components_to_plot]
-        reference_population = self.plot_settings['reference_population']
-
-        ylabel_prefix = ""
-        xlabel_prefix = ""
+        selected_components = self.pca.result[components_to_plot]
 
         grouped_results = selected_components.groupby(level='population')
         for population, values in grouped_results:
@@ -38,33 +35,22 @@ class PCAPlotter(BasePlotter):
             values.plot(kind='scatter', x=x, y=y, ax=ax, label=population,
                         **kwargs)
 
-            # Decide whether to flip the axes to keep the reference population
-            # in the upper left quadrant.
-            if population == reference_population:
-                xaxis_mean = np.mean(ax.get_xlim())
-                yaxis_mean = np.mean(ax.get_ylim())
-
-                # The median determines in which quadrant most of the scatter
-                # points of this population are located
-                reference_in_the_left = np.median(values[x]) < xaxis_mean
-                reference_in_the_top = np.median(values[y]) > yaxis_mean
-
-                if not reference_in_the_left:
-                    ax.invert_xaxis()
-                    xlabel_prefix = "–"
-                if not reference_in_the_top:
-                    ax.invert_yaxis()
-                    ylabel_prefix = "–"
-
         # Set the axes labels
+        xlabel_prefix = '—' if self.pca.inverted_x else ''
+        ylabel_prefix = '—' if self.pca.inverted_y else ''
+        xlabel_suffix = ''
+        if self.pca.rotated:
+            xlabel_suffix = '\nRotated {}°'.format(int(self.pca.rotation_angle))
+
         xvariance = self.explained_variance.ix[x]['percentage']
-        xlabel = "{}{}: {}".format(xlabel_prefix, x, xvariance)
+        xlabel = "{}{}: {}{}".format(xlabel_prefix, x, xvariance,
+                                     xlabel_suffix)
         ax.set_xlabel(xlabel)
         yvariance = self.explained_variance.ix[y]['percentage']
         ylabel = "{}{}: {}".format(ylabel_prefix, y, yvariance)
         ax.set_ylabel(ylabel)
 
-        # Remove non-data ink ;)
+        #  Remove non-data ink
         ax.tick_params(axis="x", bottom="off", top="off")
         ax.tick_params(axis="y", left="off", right="off")
         hide_spines_and_ticks(ax, 'all')
@@ -89,7 +75,7 @@ class PCAPlotter(BasePlotter):
     def _new_color(self):
         if not hasattr(self, '_more_colors'):
             palette_name = self.colors['QualitativePalette']
-            populations = self.components.index.get_level_values('population')
+            populations = self.pca.result.index.get_level_values('population')
             number_of_populations = len(populations.unique())
             self._more_colors = sns.color_palette(palette_name,
                                                   number_of_populations)

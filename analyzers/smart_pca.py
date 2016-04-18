@@ -1,7 +1,7 @@
 import pandas as pd
 import subprocess
 
-from os.path import expanduser, join, isfile
+from os.path import expanduser, join, isfile, getsize
 from shutil import copyfile
 
 from analyzers.base_pca import BasePCA
@@ -18,7 +18,12 @@ class SmartPCA(BasePCA):
         self._logfile = self._output_filepath('pca.log')
 
     def run(self, args={}):
-        if not isfile(self._evecfile) or not isfile(self._evalfile):
+        analysis_files_dont_exist = (not isfile(self._evecfile)
+                                     or not isfile(self._evalfile))
+        files_are_empty = (getsize(self._evecfile) == 0
+                           or getsize(self._evalfile) == 0)
+
+        if analysis_files_dont_exist or files_are_empty:
             self._call_smartpca(args)
 
         self._read_the_results_files()
@@ -29,9 +34,6 @@ class SmartPCA(BasePCA):
         command = '{} -p {}'.format(self._EXECUTABLE, parfile_path)
         with open(self._output_filepath('pca.log'), 'w+') as logfile:
             subprocess.call(command.split(' '), stdout=logfile)
-
-        self.call_smartpca()
-        self._read_the_results_files()
 
     def _read_the_results_files(self):
         result = pd.read_table(self._evecfile, sep="\s+", header=None,
