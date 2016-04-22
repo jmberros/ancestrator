@@ -1,7 +1,7 @@
 import pandas as pd
 
 from glob import glob
-from os.path import join, basename
+from os.path import join, basename, isfile
 
 from components.source import Source
 from helpers.config import Config
@@ -65,8 +65,13 @@ class SampleGroup:
         subsetting an existing SampleGroup. The dataframe should have the
         sample IDs as index.
         """
+        if len(new_samplegroup_label) == 0:
+            raise NameError('Please choose a non-empty SampleGroup name.')
         dest_dir = join(Source(source_label).base_dir, 'samplegroups')
         filepath = join(dest_dir, new_samplegroup_label + '.fam')
+        if isfile(filepath):
+            msg = 'Label "{}" is already in use.'.format(new_samplegroup_label)
+            raise NameError(msg)
         fam_df = samples_df.reset_index()
         fam_df['father'] = fam_df['mother'] = fam_df['sexcode'] = 0
         fam_df['pheno'] = -9
