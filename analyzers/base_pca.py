@@ -9,7 +9,8 @@ class BasePCA:
     """
     Don't instantiate this class; use instead SmartPCA or SklearnPCA.
     """
-    def plot(self, ax=None, components_to_plot=['PC1', 'PC2'], rotate=False):
+    def plot(self, ax=None, components_to_plot=['PC1', 'PC2'], rotate=False,
+             show_ticks=False):
         self.plotter = PCAPlotter(self, self.dataset.source.plots_dir)
         self.inverted_x = self.inverted_y = False
         self.invert_axes(components_to_plot)
@@ -19,7 +20,7 @@ class BasePCA:
 
         if ax is None:
             _, ax = plt.subplots(figsize=(5, 5))
-        self.plotter.draw_ax(ax, components_to_plot)
+        self.plotter.draw_ax(ax, components_to_plot, show_ticks=show_ticks)
         return ax
 
     def savefig(self, filename=None):

@@ -18,7 +18,7 @@ class PCAPlotter(BasePlotter):
         self.plot_settings = Config('plots')['PCA']
         self.explained_variance = self.pca.explained_variance
 
-    def draw_ax(self, ax, components_to_plot):
+    def draw_ax(self, ax, components_to_plot, show_ticks):
         """
         Draws a scatterplot of the first two columns in eigenvalues
         """
@@ -50,10 +50,11 @@ class PCAPlotter(BasePlotter):
         ylabel = "{}{}: {}".format(ylabel_prefix, y, yvariance)
         ax.set_ylabel(ylabel)
 
-        #  Remove non-data ink
-        ax.tick_params(axis="x", bottom="off", top="off")
-        ax.tick_params(axis="y", left="off", right="off")
-        hide_spines_and_ticks(ax, 'all')
+        if not show_ticks:
+            #  Remove non-data ink
+            ax.tick_params(axis="x", bottom="off", top="off")
+            ax.tick_params(axis="y", left="off", right="off")
+            hide_spines_and_ticks(ax, 'all')
 
         return ax
 
