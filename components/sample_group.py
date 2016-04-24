@@ -37,18 +37,21 @@ class SampleGroup:
         return all_samples.loc[samples.index]
 
     @classmethod
-    def new_samplegroup(cls, source_label, population_or_region_codes,
-                        new_samplegroup_label):
+    def new_samplegroup(cls, source_label, codes, new_samplegroup_label):
         """
         Create a new SampleGroup filtering all the available samples in a given
-        source with the provided population and/or region codes (you can mix
-        them). It will write the new .fam file needed to later use
+        source with the provided sample, population and/or region codes
+        (you can mix them). It will write the new .fam file needed to later use
         SampleGroup('NewLabel').
         """
-        all_samples = SampleGroup(source_label, 'ALL').samples
-        pop_mask = all_samples.population.isin(population_or_region_codes)
-        region_mask = all_samples.region.isin(population_or_region_codes)
-        samples_df = pd.concat([all_samples[pop_mask], all_samples[region_mask]])
+        all_samples = SampleGroup(source_label, 'ALL').samples.reset_index()
+        pop_mask = all_samples['population'].isin(codes)
+        region_mask = all_samples['region'].isin(codes)
+        sample_mask = all_samples['sample'].isin(codes)
+        samples_df = pd.concat([all_samples[pop_mask],
+                                all_samples[sample_mask],
+                                all_samples[region_mask]])
+        samples_df = samples_df.set_index('sample')
         cls.write_fam(samples_df, source_label, new_samplegroup_label)
 
         msg = "You can now call SampleGroup('{}', '{}')"

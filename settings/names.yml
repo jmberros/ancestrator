@@ -1,7 +1,9 @@
 ALL: Todos
-L: Latinos
-LE: Latinos, Europeos
-LEA: Latinos, Europeos, Africanos
-LEAC: Latinos, Europeos, Africanos, Chinos
-LEACI: Latinos, Europeos, Africanos, Chinos, Indios
-
+L: Latinoamericanos
+LE: Latinoamericanos, Europeos
+LEA: Latinoamericanos, Europeos, Africanos
+LEAC: Latinoamericanos, Europeos, Africanos, Chinos
+LEACI: Latinoamericanos, Europeos, Africanos, Chinos, Indios
+NE: Europeos + Nativos Americanos
+NA: Africanos + Nativos Americanos
+EA: Africanos + Europeos
