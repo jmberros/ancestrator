@@ -1,3 +1,32 @@
+# General use #
+## The dataset instance: fst(), pca(), and associated objects.
+```python
+dataset = Dataset('1000Genomes', 'LEA', 'GAL_Completo')  # Source, SampleGroup, Panel
+dataset.genotypes()  # => DataFrame with allele dosages per sample/marker
+
+dataset.panel  # => <Panel GAL_Completo · 445 SNPs>
+dataset.panel.snps  # => DataFrame with info per SNP
+
+dataset.samplegroup  # => <SampleGroup LEA · 3 regions · 8 populations · 752 samples>
+dataset.samplegroup.samples  # => DataFrame with population info per sample
+
+dataset.source  # => <Source 1000Genomes>
+dataset.source.populations  # => DataFrame with info per population
+
+dataset.fst()  # => DataFrame of fst values per marker
+
+pca = dataset.pca('smartpca')  # 'sklearn' is the other option
+pca.result  # => DataFrame with values of each sample in the PC space
+
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(1, 1, 1)
+pca.plot(ax=ax, components_to_plot=['PC2', 'PC3'])
+plt.show()
+# ^ plots the passed components in the passed ax
+# omit the ax argument and a new fig will be created
+# components_to_plot can be omitted, it has the obvs default of PC1 vs. PC2
+```
+
 # Add a new Source #
 * Create a new dir with the source name under the sources directory (sources directory is defined in `settings/dirs.yml`).
 * Put there a `samples.csv` with info about each sample. Fields are: `sample,family,population,region` (include a header!)
