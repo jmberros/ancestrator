@@ -66,7 +66,10 @@ class Dataset:
                          panel.label))
 
     def make_bed(self):
-        if isfile(self.bedfile + '.bed'):
+        bed_exists = isfile(self.bedfile + '.bed')
+        bim_exists = isfile(self.bedfile + '.bim')
+        fam_exists = isfile(self.bedfile + '.fam')
+        if bed_exists and bim_exists and fam_exists:
             return self.bedfile
         plink = Plink(self.panel_bedfile)
         return plink.keep_fam(self.samplegroup.famfile, out=self.bedfile)

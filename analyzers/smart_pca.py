@@ -20,11 +20,12 @@ class SmartPCA(BasePCA):
     def run(self, args={}):
         analysis_files_dont_exist = (not isfile(self._evecfile)
                                      or not isfile(self._evalfile))
-        files_are_empty = (getsize(self._evecfile) == 0
-                           or getsize(self._evalfile) == 0)
 
-        if analysis_files_dont_exist or files_are_empty:
+        if analysis_files_dont_exist:
             self._call_smartpca(args)
+        else:
+            if getsize(self._evecfile) == 0 or getsize(self._evalfile) == 0:
+                self._call_smartpca(args)
 
         self._read_the_results_files()
 
