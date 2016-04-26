@@ -27,3 +27,17 @@ PCA:
         alpha: 1
         linewidth: 0.25
         zorder: 1
+
+admixture:
+    population_order:
+        - PEL
+        - MXL
+        - CLM
+        - PUR
+        - IBS
+        - GBR
+        - YRI
+        - LWK
+        - CHS
+        - CHB
+        - GIH

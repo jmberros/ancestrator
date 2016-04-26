@@ -6,10 +6,11 @@ from shutil import copyfile
 
 from analyzers.base_pca import BasePCA
 from helpers.helpers import percentage_fmt
+from helpers.config import Config
 
 
 class SmartPCA(BasePCA):
-    _EXECUTABLE = expanduser('~/software/eigensoft6/src/eigensrc/smartpca')
+    _EXECUTABLE = expanduser(Config('executables')['smartpca'])
 
     def __init__(self, dataset):
         self.dataset = dataset

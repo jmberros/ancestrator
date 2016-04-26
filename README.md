@@ -25,6 +25,10 @@ plt.show()
 # ^ plots the passed components in the passed ax
 # omit the ax argument and a new fig will be created
 # components_to_plot can be omitted, it has the obvs default of PC1 vs. PC2
+
+dataset.admixture(K=3)
+dataste.admixture(K=[2, 3, 4], infer_components=True)
+# => DataFrame of cluster pertenence proportions for each sample
 ```
 
 # Add a new Source #
