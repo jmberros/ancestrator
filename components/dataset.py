@@ -66,7 +66,7 @@ class Dataset:
         self.make_bed()
         return Fst.run(self, level)
 
-    def admixture(self, Ks, cores=4):
+    def admixture(self, Ks, cores=4, infer_components=False):
         """
         Run admixture for a list of K values. You may specify the number of
         CPU cores for admixture to use (the more, the faster, obvs).
@@ -74,7 +74,7 @@ class Dataset:
         """
         self.make_bed()
         admixture = Admixture(self)
-        admixture.run(Ks, cores)
+        admixture.run(Ks, cores, infer_components)
         return admixture
 
     def extract_subdataset_from_panel(self, panel):

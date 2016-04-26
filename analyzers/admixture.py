@@ -17,7 +17,7 @@ class Admixture:
         self.Qfiles = {}
         self.logfiles = {}
 
-    def run(self, Ks, cores):
+    def run(self, Ks, cores, infer_components=False):
         if not hasattr(Ks, '__iter__'):
             Ks = [Ks]
 
@@ -31,7 +31,7 @@ class Admixture:
             self.result[K] = self._read_ancestry_file(K)
 
             regions = self.result[K].index.get_level_values('region').unique()
-            if len(regions) >= 3:
+            if infer_components and len(regions) >= 3:
                 self._assign_regions_to_clusters(self.result[K])
 
     def plot(self, K_to_plot, ax=None):
