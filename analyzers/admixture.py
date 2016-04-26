@@ -49,8 +49,13 @@ class Admixture:
             _, ax = plt.subplots(figsize=(15, 2.5))
 
         self.plotter.draw_ax(ax, K, population_means=population_means)
-
         return ax
+
+    def plot_triangle(self, ax=None):
+        self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
+        if ax is None:
+            _, ax = plt.subplots(figsize=(10, 10))
+        return self.plotter.draw_triangle_ax(ax=ax)
 
     def savefig(self, filename=None):
         if filename is None:

@@ -1,4 +1,5 @@
 import seaborn as sns
+import ternary
 from helpers.config import Config
 from helpers.helpers import hide_spines_and_ticks
 
@@ -35,6 +36,22 @@ class AdmixturePlotter:
         if population_means:
             sns.despine(top=True, left=True, right=True)
         return ax
+
+    def draw_triangle_ax(self, ax):
+        if 3 not in self.admixture.result:
+            raise Exception("I don't have results for K=3!")
+        ancestries = self.admixture.result[3]
+        fig, tax = ternary.figure(scale=1, ax=ax)
+
+        ancestries = ancestries[["EUR", "AFR", "AMR"]].dropna()
+        by_population = ancestries.groupby(level="population", sort=False)
+        for population, df in by_population:
+            tax.scatter(df.values, label=population, s=45, alpha=0.75,
+                        color=self.colors[population], marker='o')
+
+        plot_title = self._make_title(3)
+        self._ternary_plot_aesthetics(tax, plot_title, ancestries)
+        return tax
 
     def _reorder_samples_and_parse(self, ancestries):
         ancestries = ancestries.reset_index()
@@ -83,6 +100,18 @@ class AdmixturePlotter:
         ax.set_yticks([0, 1])
         #  ax.set_yticklabels([0, 1])
         #  hide_spines_and_ticks(ax, spines='all')
+
+    def _ternary_plot_aesthetics(self, tax, title, ancestries):
+        hide_spines_and_ticks(tax.get_axes(), spines="all")
+        tax.boundary(linewidth=0.25)
+        tax.clear_matplotlib_ticks()
+        tax.set_title(title, position=(0.5, 1.15))
+        tax.legend(frameon=False,  scatterpoints=1, bbox_to_anchor=(0.975, 1.125))
+        tax.bottom_axis_label(ancestries.columns[0], position=(1, 0, 0), rotation=0)
+        tax.right_axis_label(ancestries.columns[1], position=(-0.1, 1.2, -0.1), rotation=0)
+        tax.left_axis_label(ancestries.columns[2], position=(0, 0, 1), rotation=0)
+
+        return tax
 
     def _new_color(self):
         if not hasattr(self, '_more_colors'):
