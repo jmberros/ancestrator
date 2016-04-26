@@ -1,6 +1,9 @@
-# General use #
-## The dataset instance: fst(), pca(), and associated objects.
+# General use and recipes #
+## The Dataset instance and its Panel, SampleGroup, Source
 ```python
+from ancestrator import Dataset
+
+
 dataset = Dataset('1000Genomes', 'LEA', 'GAL_Completo')  # Source, SampleGroup, Panel
 dataset.genotypes()  # => DataFrame with allele dosages per sample/marker
 
@@ -12,22 +15,39 @@ dataset.samplegroup.samples  # => DataFrame with population info per sample
 
 dataset.source  # => <Source 1000Genomes>
 dataset.source.populations  # => DataFrame with info per population
+```
+## Common analyses on the dataset: Fst, PCA, Admixture
+```python
+import matplotlib.pyplot as plt
+
 
 dataset.fst()  # => DataFrame of fst values per marker
 
 pca = dataset.pca('smartpca')  # 'sklearn' is the other option
 pca.result  # => DataFrame with values of each sample in the PC space
-
-fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(1, 1, 1)
+fig, ax = plt.subplots(figsize=(5, 5))
 pca.plot(ax=ax, components_to_plot=['PC2', 'PC3'])
 plt.show()
 # ^ plots the passed components in the passed ax
 # omit the ax argument and a new fig will be created
-# components_to_plot can be omitted, it has the obvs default of PC1 vs. PC2
+# components_to_plot can be omitted too, it has the obvs default of PC1 vs. PC2
 
-dataste.admixture(Ks=[2, 3, 4], infer_components=True)
+Ks = [2, 3, 4]
+admixture = dataste.admixture(Ks=Ks, cores=4)
 # => DataFrame of cluster pertenence proportions for each sample
+
+for K in Ks:
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
+    admixture.plot(ax=ax1, K=K)
+    # ^ Plots a column per sample with ancestry ratios
+    admixture.plot(ax=ax2, K=K, population_means=True)
+    # ^ Plots population ancestry means
+    ax2.set_title('')
+    plt.tight_layout()
+    plt.show()
+
+admixture.plot_triangle()
+# ^ Plots a triangle scatter with K=3
 ```
 
 # Add a new Source #

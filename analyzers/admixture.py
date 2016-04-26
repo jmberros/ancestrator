@@ -54,7 +54,7 @@ class Admixture:
     def plot_triangle(self, ax=None):
         self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
         if ax is None:
-            _, ax = plt.subplots(figsize=(10, 10))
+            _, ax = plt.subplots(figsize=(7, 6))
         return self.plotter.draw_triangle_ax(ax=ax)
 
     def savefig(self, filename=None):

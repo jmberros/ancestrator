@@ -46,10 +46,10 @@ class AdmixturePlotter:
         ancestries = ancestries[["EUR", "AFR", "AMR"]].dropna()
         by_population = ancestries.groupby(level="population", sort=False)
         for population, df in by_population:
-            tax.scatter(df.values, label=population, s=45, alpha=0.75,
-                        color=self.colors[population], marker='o')
+            tax.scatter(df.values, label=population, s=45, marker='o',
+                        color=self.colors[population])
 
-        plot_title = self._make_title(3)
+        plot_title = self._make_title(3).replace(' - ', '\n')
         self._ternary_plot_aesthetics(tax, plot_title, ancestries)
         return tax
 

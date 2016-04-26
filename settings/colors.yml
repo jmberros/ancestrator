@@ -2,11 +2,11 @@ QualitativePalette: Dark2
 # Check http://colorbrewer2.org/ for more palettes
 
 # Regions
-# AMR: "#e41a1c"
-# EUR: "#377eb8"
-# AFR: "#4daf4a"
-# EAS: "#f781bf"
-# SAS: "#984ea3"
+AMR: "#e41a1c"
+EUR: "#377eb8"
+AFR: "#4daf4a"
+EAS: "#f781bf"
+SAS: "#984ea3"
 
 # Latin America
 CLM: DarkGreen
