@@ -66,7 +66,7 @@ class Dataset:
         self.make_bed()
         return Fst.run(self, level)
 
-    def admixture(self, Ks, cores=4, infer_components=False):
+    def admixture(self, Ks, cores=4, infer_components=True):
         """
         Run admixture for a list of K values. You may specify the number of
         CPU cores for admixture to use (the more, the faster, obvs).

@@ -16,6 +16,7 @@ class Admixture:
         self.Pfiles = {}
         self.Qfiles = {}
         self.logfiles = {}
+        self.config = Config('plots')['admixture']
 
     def run(self, Ks, cores, infer_components=False):
         if not hasattr(Ks, '__iter__'):
@@ -33,13 +34,15 @@ class Admixture:
             regions = self.result[K].index.get_level_values('region').unique()
             if infer_components and len(regions) >= 3:
                 self._assign_regions_to_clusters(self.result[K])
+                self._infer_clusters_from_reference_pop(self.result[K])
+                self.result[K] = self._reorder_clusters(self.result[K])
 
-    def plot(self, K_to_plot, ax=None):
+    def plot(self, K, ax=None):
         self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
 
         if ax is None:
-            _, ax = plt.subplots(figsize=(15, 5))
-        self.plotter.draw_ax(ax, K_to_plot)
+            _, ax = plt.subplots(figsize=(15, 2.5))
+        self.plotter.draw_ax(ax, K)
         return ax
 
     def savefig(self, filename=None):
@@ -67,30 +70,29 @@ class Admixture:
 
         ancestries_df.rename(columns=guesses, inplace=True)
 
-    #  def _infer_ancestral_components_from_reference_pop(self, ancestries_df):
-        #  # Last resort after #infer_ancestral_components_from_samples_region
-        #  # With Peruvians' mean as reference, I can guess their known 3
-        #  # ancestral components.
-        #  reference_population = "PEL"
-        #  reference_ancestries = ["AMR", "EUR", "AFR"]
+    def _infer_clusters_from_reference_pop(self, ancestries):
+        reference_population = self.config['reference_population']
+        reference_ancestries = self.config['reference_population_ancestries']
+        by_population = ancestries.groupby(level='population')
+        mean_ancestries = by_population.mean().loc[reference_population]
+        components_order = mean_ancestries.sort_values(ascending=False).index
 
-        #  components_order = ancestries_df.groupby("population").mean()
-        #  components_order = components_order.loc[reference_population]
-        #  components_order = components_order.sort_values(ascending=False).index
+        guesses = {}
+        for component, ancestry in zip(components_order, reference_ancestries):
+            if type(component) != int:
+                continue  # Don't re-guess already known ancestries
+            if ancestry not in ancestries.columns:
+                guesses[component] = ancestry
 
-        #  guess = {}
-        #  for component, ancestry in zip(components_order, reference_ancestries):
-            #  if type(component) != int:
-                #  continue  # Don't re-guess already known ancestries
+        if len(guesses) > 0:
+            ancestries.rename(columns=guesses, inplace=True)
 
-            #  ancestries_already_inferred = [col for col in ancestries_df.columns
-                                           #  if type(col) != int]
-
-            #  if ancestry not in ancestries_already_inferred:
-                #  guess[component] = ancestry
-
-        #  if len(guess) > 0:
-            #  ancestries_df.rename(columns=guess, inplace=True)
+    def _reorder_clusters(self, ancestries):
+        cluster_order = Config('plots')['admixture']['cluster_order']
+        ordered = [c for c in cluster_order if c in ancestries.columns]
+        the_rest = [c for c in ancestries.columns if c not in ordered]
+        ancestries = ancestries[ordered + the_rest]
+        return ancestries
 
     def _read_ancestry_file(self, K):
         result = pd.read_table(self.Qfiles[K], sep='\s+', header=None)

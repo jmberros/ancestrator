@@ -1,5 +1,6 @@
 import seaborn as sns
 from helpers.config import Config
+from helpers.helpers import hide_spines_and_ticks
 
 
 class AdmixturePlotter:
@@ -18,30 +19,13 @@ class AdmixturePlotter:
         ancestries = self.admixture.result[K_to_plot]
         ancestries = self._reorder_samples_and_parse(ancestries)
 
-        #  # Plot that baby
-        #  plot_title = self._make_title(dataset_label, K, panel_label)
+        plot_title = self._make_title(K_to_plot)
         colors = self._generate_palette(ancestries.columns)
         ancestries.plot(ax=ax, kind="bar", stacked=True, linewidth=0, width=1,
                         color=colors)
 
-        #  # Place the population labels in the middle of the range of its samples
-        #  population_order = ancestries.index.unique()
-        #  N_by_population = ancestries.index.value_counts()[population_order]
-        #  xlabels = N_by_population.cumsum() - N_by_population / 2
-        #  ax.set_xticklabels(xlabels.index)
-        #  ax.set_xticks(xlabels.values)
-
-        #  ax.set_ylim([0, 1])
-        #  self._plot_aesthetics(ax, plot_title)
-        #  if not title_on:
-            #  ax.set_title("")
-        #  ax.legend_.set_visible(False)
-
-        #  filepath = self._make_filepath(dataset_label, K, panel_label)
-        #  plt.savefig(filepath + "__samples", bbox_inches="tight")
-
-        #  fig.clf()
-
+        self._plot_aesthetics(ax, plot_title, ancestries)
+        ax.legend_.set_visible(False)
         return ax
 
     def _reorder_samples_and_parse(self, ancestries):
@@ -72,12 +56,23 @@ class AdmixturePlotter:
         palette += sns.color_palette(quali_palette, remaining)
         return palette
 
-    def _plot_aesthetics(self, ax, plot_title):
+    def _plot_aesthetics(self, ax, plot_title, ancestries):
+        ax.set_title(plot_title, y=1.08)
+
+        # Place the population labels in the middle of the range of its samples
+        population_order = ancestries.index.unique()
+        N_by_population = ancestries.index.value_counts()[population_order]
+        xlabels = N_by_population.cumsum() - N_by_population / 2
+        ax.set_xticklabels(xlabels.index)
+        ax.set_xticks(xlabels.values)
+
         ax.set_xlabel("")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
-        ax.set_ylabel("Ancestrías")
-        ax.set_yticklabels([])  # No need to state ratios exactly
-        #  hide_spines_and_ticks(ax)
+        ax.set_ylabel("Ancestría")
+        ax.set_ylim([0, 1])
+        ax.set_yticks([0, 1])
+        #  ax.set_yticklabels([0, 1])
+        #  hide_spines_and_ticks(ax, spines='all')
 
     def _new_color(self):
         if not hasattr(self, '_more_colors'):
@@ -88,7 +83,6 @@ class AdmixturePlotter:
                                                   number_of_regions)
         return self._more_colors.pop(0)
 
-    def _make_title(self, dataset_label, K, panel_label):
-        dataset_name = Dataset(dataset_label).name
-        panel_name = Panel(panel_label).name
-        return "{} - {} (K = {})".format(dataset_name, panel_name, K)
+    def _make_title(self, K):
+        dataset = self.admixture.dataset
+        return "{} - {} (K = {})".format(dataset.label, dataset.panel.name, K)

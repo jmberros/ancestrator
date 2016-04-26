@@ -29,6 +29,17 @@ PCA:
         zorder: 1
 
 admixture:
+    cluster_order:
+        - AMR
+        - EUR
+        - AFR
+        - EAS
+        - SAS
+    reference_population: PEL
+    reference_population_ancestries:
+        - AMR
+        - EUR
+        - AFR
     population_order:
         - PEL
         - MXL
