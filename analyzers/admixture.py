@@ -37,12 +37,19 @@ class Admixture:
                 self._infer_clusters_from_reference_pop(self.result[K])
                 self.result[K] = self._reorder_clusters(self.result[K])
 
-    def plot(self, K, ax=None):
+    def population_means(self, K):
+        if K not in self.result:
+            raise ValueError("I don't have results for K={}.".format(K))
+        return self.result[K].groupby(level='population').mean()
+
+    def plot(self, K, population_means=False, ax=None):
         self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
 
         if ax is None:
             _, ax = plt.subplots(figsize=(15, 2.5))
-        self.plotter.draw_ax(ax, K)
+
+        self.plotter.draw_ax(ax, K, population_means=population_means)
+
         return ax
 
     def savefig(self, filename=None):

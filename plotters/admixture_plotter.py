@@ -15,17 +15,25 @@ class AdmixturePlotter:
             self.base_dir = self.admixture.dataset.source.plots_dir
         self.plot_settings = Config('plots')['admixture']
 
-    def draw_ax(self, ax, K_to_plot):
+    def draw_ax(self, ax, K_to_plot, population_means=False):
         ancestries = self.admixture.result[K_to_plot]
         ancestries = self._reorder_samples_and_parse(ancestries)
+        if population_means:
+            ancestries = ancestries.groupby(level='population').mean()
+            population_order = self.plot_settings['population_order']
+            ancestries = ancestries.loc[population_order].dropna()
 
         plot_title = self._make_title(K_to_plot)
-        colors = self._generate_palette(ancestries.columns)
-        ancestries.plot(ax=ax, kind="bar", stacked=True, linewidth=0, width=1,
-                        color=colors)
+        palette = self._generate_palette(ancestries.columns)
 
-        self._plot_aesthetics(ax, plot_title, ancestries)
-        ax.legend_.set_visible(False)
+        width = 0.5 if population_means else 1
+        ancestries.plot(ax=ax, kind="bar", stacked=True, linewidth=0,
+                        width=width, color=palette)
+
+        self._plot_aesthetics(ax, plot_title, population_means, ancestries)
+
+        if population_means:
+            sns.despine(top=True, left=True, right=True)
         return ax
 
     def _reorder_samples_and_parse(self, ancestries):
@@ -56,15 +64,17 @@ class AdmixturePlotter:
         palette += sns.color_palette(quali_palette, remaining)
         return palette
 
-    def _plot_aesthetics(self, ax, plot_title, ancestries):
-        ax.set_title(plot_title, y=1.08)
+    def _plot_aesthetics(self, ax, plot_title, population_means, ancestries):
+        ax.set_title(plot_title, y=1.01, family='serif')
+        ax.legend_.set_visible(False)
 
-        # Place the population labels in the middle of the range of its samples
-        population_order = ancestries.index.unique()
-        N_by_population = ancestries.index.value_counts()[population_order]
-        xlabels = N_by_population.cumsum() - N_by_population / 2
-        ax.set_xticklabels(xlabels.index)
-        ax.set_xticks(xlabels.values)
+        if not population_means:
+            # Place the population labels in the middle of its samples
+            population_order = ancestries.index.unique()
+            N_by_population = ancestries.index.value_counts()[population_order]
+            xlabels = N_by_population.cumsum() - N_by_population / 2
+            ax.set_xticklabels(xlabels.index)
+            ax.set_xticks(xlabels.values)
 
         ax.set_xlabel("")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
@@ -85,4 +95,5 @@ class AdmixturePlotter:
 
     def _make_title(self, K):
         dataset = self.admixture.dataset
-        return "{} - {} (K = {})".format(dataset.label, dataset.panel.name, K)
+        return "{} - {} (K = {})".format(dataset.samplegroup.name,
+                                         dataset.panel.name, K)
