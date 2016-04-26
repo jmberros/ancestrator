@@ -38,7 +38,7 @@ class Admixture:
         self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
 
         if ax is None:
-            _, ax = plt.subplots(figsize=(5, 5))
+            _, ax = plt.subplots(figsize=(15, 5))
         self.plotter.draw_ax(ax, K_to_plot)
         return ax
 
