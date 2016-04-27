@@ -38,8 +38,6 @@ class AdmixturePlotter:
         return ax
 
     def draw_triangle_ax(self, ax):
-        if 3 not in self.admixture.result:
-            raise Exception("I don't have results for K=3!")
         ancestries = self.admixture.result[3]
         fig, tax = ternary.figure(scale=1, ax=ax)
 
@@ -52,6 +50,21 @@ class AdmixturePlotter:
         plot_title = self._make_title(3).replace(' - ', '\n')
         self._ternary_plot_aesthetics(tax, plot_title, ancestries)
         return tax
+
+    def draw_cv_error(self, ax):
+        Ks = list(self.admixture.cv_error.keys())
+        ymin = self.admixture.cv_error.min()
+        xmin = self.admixture.cv_error.idxmin()
+        self.admixture.cv_error.plot(ax=ax, zorder=0, lw=0.75, color='grey',
+                                     marker='o')
+        ax.scatter(xmin, ymin, marker='o', zorder=1, s=85, edgecolor='black',
+                   color='tomato', lw=1)
+        ax.axvline(xmin, color='grey', linestyle='dotted')
+        sns.despine(left=True, bottom=True)
+        ax.set_ylabel("CV Error")
+        ax.set_xlim(Ks[0] - 0.10, Ks[-1] + 0.10)
+        ax.set_xticks(Ks)
+        return ax
 
     def _reorder_samples_and_parse(self, ancestries):
         ancestries = ancestries.reset_index()

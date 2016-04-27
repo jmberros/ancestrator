@@ -1,3 +1,4 @@
+import re
 import subprocess
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,25 +17,34 @@ class Admixture:
         self.Pfiles = {}
         self.Qfiles = {}
         self.logfiles = {}
+        self.result = {}
+        self.cv_error = pd.Series([], index=[])
+        self.cv_error.index.name = 'K'
         self.config = Config('plots')['admixture']
+        self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
 
-    def run(self, Ks, cores, infer_components=False):
+    def __repr__(self):
+        return "<Admixture for {}, Ks={}>".format(self.dataset.label,
+                                                  list(self.result.keys()))
+
+    def run(self, Ks, cores, infer_components=False, overwrite=False):
         if not hasattr(Ks, '__iter__'):
             Ks = [Ks]
 
-        self.result = {}
         for K in Ks:
             self.logfiles[K] = self._output_filepath(K, 'log')
             self.Pfiles[K] = self._output_filepath(K, 'P')
             self.Qfiles[K] = self._output_filepath(K, 'Q')
-            if not isfile(self.Pfiles[K]) or not isfile(self.Qfiles[K]):
+            analysis_exists = isfile(self.Pfiles[K]) or isfile(self.Qfiles[K])
+            if not analysis_exists or overwrite:
                 self._call_admixture(K, cores)
             self.result[K] = self._read_ancestry_file(K)
+            self.cv_error.loc[K] = self._read_cv_error_file(K)
 
             regions = self.result[K].index.get_level_values('region').unique()
             if infer_components and len(regions) >= 3:
                 self._assign_regions_to_clusters(self.result[K])
-                self._infer_clusters_from_reference_pop(self.result[K])
+                self._infer_clusters_from_reference_population(self.result[K])
                 self.result[K] = self._reorder_clusters(self.result[K])
 
     def population_means(self, K):
@@ -43,19 +53,22 @@ class Admixture:
         return self.result[K].groupby(level='population').mean()
 
     def plot(self, K, population_means=False, ax=None):
-        self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
-
         if ax is None:
             _, ax = plt.subplots(figsize=(15, 2.5))
-
         self.plotter.draw_ax(ax, K, population_means=population_means)
         return ax
 
     def plot_triangle(self, ax=None):
-        self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
+        if 3 not in self.result:
+            raise Exception("I don't have results for K=3!")
         if ax is None:
             _, ax = plt.subplots(figsize=(7, 6))
         return self.plotter.draw_triangle_ax(ax=ax)
+
+    def plot_cv_error(self, ax=None):
+        if ax is None:
+            _, ax = plt.subplots(figsize=(8, 4))
+        return self.plotter.draw_cv_error(ax=ax)
 
     def savefig(self, filename=None):
         if filename is None:
@@ -82,7 +95,7 @@ class Admixture:
 
         ancestries_df.rename(columns=guesses, inplace=True)
 
-    def _infer_clusters_from_reference_pop(self, ancestries):
+    def _infer_clusters_from_reference_population(self, ancestries):
         reference_population = self.config['reference_population']
         reference_ancestries = self.config['reference_population_ancestries']
         by_population = ancestries.groupby(level='population')
@@ -114,6 +127,22 @@ class Admixture:
         multi_index = ['region', 'population', 'family', 'sample']
         result = result.reset_index().set_index(multi_index)
         return result
+
+    def _read_cv_error_file(self, K):
+        log_fn = self.logfiles[K]
+        with open(log_fn, 'r') as logfile:
+            cv_error_lines = [line.strip() for line in logfile.readlines()
+                              if re.match('CV error', line)]
+
+            if len(cv_error_lines) != 1:
+                msg = ('I expected exactly one match for "CV Error" in '
+                       'admixture\'s logfile, but I found {}. '
+                       'Check: {}'.format(len(cv_error_lines), log_fn))
+                raise Exception(msg)
+
+            cv_error_match = re.search('(\d\.\d*$)', cv_error_lines[0])
+
+        return float(cv_error_match.group(0))
 
     def _call_admixture(self, K, cores):
         command = '{} --cv {}.bed {} -j{}'

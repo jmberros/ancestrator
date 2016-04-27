@@ -66,15 +66,17 @@ class Dataset:
         self.make_bed()
         return Fst.run(self, level)
 
-    def admixture(self, Ks, cores=4, infer_components=True):
+    def admixture(self, Ks, cores=4, infer_components=True, overwrite=False):
         """
         Run admixture for a list of K values. You may specify the number of
-        CPU cores for admixture to use (the more, the faster, obvs).
+        CPU cores for admixture to use. Set 'overwrite=True' to make it ignore
+        existing results files if it finds them; otherwise, it will read them
+        instead of rerunning the analysis, to save time.
         Returns an admixture object that responds to #results and #plot().
         """
         self.make_bed()
         admixture = Admixture(self)
-        admixture.run(Ks, cores, infer_components)
+        admixture.run(Ks, cores, infer_components, overwrite)
         return admixture
 
     def extract_subdataset_from_panel(self, panel):

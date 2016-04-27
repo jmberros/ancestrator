@@ -36,6 +36,9 @@ Ks = [2, 3, 4]
 admixture = dataste.admixture(Ks=Ks, cores=4)
 # => DataFrame of cluster pertenence proportions for each sample
 
+admixture.cv_error  # => Series with cv error per K
+admixture.plot_cv_error()  # => Plots cv error values highlighting optimal K
+
 for K in Ks:
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
     admixture.plot(ax=ax1, K=K)
@@ -46,8 +49,7 @@ for K in Ks:
     plt.tight_layout()
     plt.show()
 
-admixture.plot_triangle()
-# ^ Plots a triangle scatter with K=3
+admixture.plot_triangle()  # => Plots a triangle scatter with K=3
 ```
 
 # Add a new Source #
