@@ -1,7 +1,7 @@
 import pandas as pd
 import subprocess
 
-from os.path import join, isfile, basename
+from os.path import join, isfile, isdir, basename
 from glob import glob
 from helpers.config import Config
 
@@ -21,6 +21,10 @@ class Source:
             It will creat a .traw for dataset if it doesn't find one.
         """
         self.base_dir = join(Config('dirs')['sources'], source_label)
+        if not isdir(self.base_dir):
+            msg = ("I couldn't find a '{}' directory. "
+                   "Is the name of the Source mispelled?'")
+            raise Exception(msg.format(self.base_dir))
         self.datasets_dir = join(self.base_dir, 'datasets')
         self.plots_dir = join(self.base_dir, 'plots')
         self.label = source_label

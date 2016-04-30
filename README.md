@@ -39,7 +39,7 @@ admixture = dataste.admixture(Ks=Ks, cores=4)
 admixture.cv_error  # => Series with cv error per K
 admixture.plot_cv_error()  # => Plots cv error values highlighting optimal K
 
-for K in Ks:
+for K in admixture.result:
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
     admixture.plot(ax=ax1, K=K)
     # ^ Plots a column per sample with ancestry ratios

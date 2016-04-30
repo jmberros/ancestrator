@@ -23,6 +23,11 @@ class BasePCA:
         self.plotter.draw_ax(ax, components_to_plot, show_ticks=show_ticks)
         return ax
 
+    def __repr__(self):
+        s = '<{} for {}>'.format(self.__class__.__name__,
+                                 self.dataset.full_label)
+        return s
+
     def savefig(self, filename=None):
         if filename is None:
             filename = '{}.{}'.format(self.dataset.label, type(self).__name__)

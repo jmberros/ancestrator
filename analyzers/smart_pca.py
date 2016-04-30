@@ -18,11 +18,11 @@ class SmartPCA(BasePCA):
         self._evalfile = self._output_filepath('pca.eval')
         self._logfile = self._output_filepath('pca.log')
 
-    def run(self, args={}):
+    def run(self, overwrite=False, args={}):
         analysis_files_dont_exist = (not isfile(self._evecfile)
                                      or not isfile(self._evalfile))
 
-        if analysis_files_dont_exist:
+        if analysis_files_dont_exist or overwrite:
             self._call_smartpca(args)
         else:
             if getsize(self._evecfile) == 0 or getsize(self._evalfile) == 0:
@@ -31,8 +31,8 @@ class SmartPCA(BasePCA):
         self._read_the_results_files()
 
     def _call_smartpca(self, args={}):
-        args = {**self.arguments(), **args}
-        parfile_path = self._create_parameters_file(args)
+        self.args = {**self.arguments(), **args}
+        parfile_path = self._create_parameters_file()
         command = '{} -p {}'.format(self._EXECUTABLE, parfile_path)
         with open(self._output_filepath('pca.log'), 'w+') as logfile:
             subprocess.call(command.split(' '), stdout=logfile)
@@ -67,10 +67,10 @@ class SmartPCA(BasePCA):
         }
         return args
 
-    def _create_parameters_file(self, args):
+    def _create_parameters_file(self):
         parfile_path = join(self.dataset.bedfile + '.pca.par')
         with open(parfile_path, 'w+') as parfile:
-            for argname, argvalue in args.items():
+            for argname, argvalue in self.args.items():
                 parfile.write('{}: {}\n'.format(argname, argvalue))
         return parfile_path
 

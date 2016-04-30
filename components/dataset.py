@@ -24,6 +24,7 @@ class Dataset:
         self.panel_bedfile = self.source.bedfile_path('ALL.'+self.panel.label)
 
         self.label = '{}.{}'.format(self.samplegroup.label, self.panel.label)
+        self.full_label = '{}.{}'.format(self.source.label, self.label)
         self.bedfile = self.source.bedfile_path(self.label)
         self.bimfile = self.bedfile + '.bim'
         self.pedfile = self.bedfile + '.ped'
@@ -42,7 +43,8 @@ class Dataset:
 
         return self._genotypes_mem
 
-    def pca(self, implementation='smartpca', normalize=True, args={}):
+    def pca(self, implementation='smartpca', overwrite=False,
+            normalize=True, args={}):
         """
         Computes a Principal Components Analysis with the genotypes in this
         dataset. Returns a PCA object that responds to #results and #plot().
@@ -50,7 +52,7 @@ class Dataset:
         if implementation == 'smartpca':
             self.make_ped()
             pca = SmartPCA(dataset=self)
-            pca.run(args)
+            pca.run(overwrite=overwrite, args=args)
             return pca
         elif implementation == 'sklearn':
             pca = SklearnPCA(self)

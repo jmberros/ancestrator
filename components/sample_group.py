@@ -89,9 +89,9 @@ class SampleGroup:
         FID and IID are usually the same, the clusters field is what matters
         for later use with plink --fst.
         """
-        # Family ID (FID), Within-family ID (IID), Cluster ID
         clusters = self.samples.reset_index()
         clusters["FID"] = clusters["sample"]
+        # FIXME: FID=IID might not be ok if there's family info in the samples
         clusters = clusters[["FID", "sample", level]]
         filename = "{}.{}.clusters".format(self.label, level)
         filepath = join(self.base_dir, filename)

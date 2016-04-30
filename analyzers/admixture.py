@@ -24,7 +24,7 @@ class Admixture:
         self.plotter = AdmixturePlotter(self, self.dataset.source.plots_dir)
 
     def __repr__(self):
-        return "<Admixture for {}, Ks={}>".format(self.dataset.label,
+        return "<Admixture for {}, Ks={}>".format(self.dataset.full_label,
                                                   list(self.result.keys()))
 
     def run(self, Ks, cores, infer_components=False, overwrite=False):
@@ -44,8 +44,8 @@ class Admixture:
             regions = self.result[K].index.get_level_values('region').unique()
             if infer_components and len(regions) >= 3:
                 self._assign_regions_to_clusters(self.result[K])
-                self._infer_clusters_from_reference_population(self.result[K])
-                self.result[K] = self._reorder_clusters(self.result[K])
+            self._infer_clusters_from_reference_population(self.result[K])
+            self.result[K] = self._reorder_clusters(self.result[K])
 
     def population_means(self, K):
         if K not in self.result:
@@ -149,10 +149,14 @@ class Admixture:
         command = command.format(self._EXECUTABLE, self.dataset.bedfile, K,
                                  cores)
         working_dir = getcwd()
-        chdir(self.dataset.source.datasets_dir)
-        with open(self.logfiles[K], 'w+') as logfile:
-            subprocess.call(command.split(' '), stdout=logfile)
-        chdir(working_dir)
+        try:
+            chdir(self.dataset.source.datasets_dir)
+            with open(self.logfiles[K], 'w+') as logfile:
+                subprocess.call(command.split(' '), stdout=logfile)
+        finally:
+            # Make sure you come back to the original working directory, even
+            # in case of a KeyboardInterrupt or any Exception in general.
+            chdir(working_dir)
 
     def _output_filepath(self, K, output_label):
         return self.dataset.bedfile + '.{}.{}'.format(K, output_label)

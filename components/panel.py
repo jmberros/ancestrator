@@ -98,10 +98,14 @@ class Panel:
         """
         Create a subpanel with the SNPs provided (must be a subset of my SNPs).
         """
-        snps_subset_df = self.snps.loc[snps_list]
+        snps_subset_df = self.snps.loc[snps_list].dropna()
+        if len(snps_subset_df) != len(snps_list):
+            raise Exception("I don't have all of those SNPs.")
         snps_subset_df.index.name = 'rs_id'  # ^ .loc removes the index name :/
         new_label = '{}_SubPanel_{}'.format(self.label, len(snps_subset_df))
         snps_filepath = self.write_bim(snps_subset_df, new_label)
+
+        # Create a base bedfile with genotypes for all the samples
         out_label = 'ALL.{}'.format(new_label)
         bedfile_path = self.bedfile_path(source_label)
         Plink(bedfile_path).extract(snps_filepath, out=out_label)
@@ -146,4 +150,5 @@ class Panel:
         if source_label is not None:
             glob_expr = join(Source(source_label).panels_dir, '*.bim')
             bim_files = glob(glob_expr)
-        return [basename(f).replace('.bim', '') for f in bim_files]
+        panel_labels = [basename(f).replace('.bim', '') for f in bim_files]
+        return sorted(panel_labels)
